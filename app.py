@@ -93,6 +93,20 @@ FEATURE_NAMES = {
     "PhysActivity": "Physical Activity (last 30 days)"
 }
 
+FEATURE_INFO = {
+    "GenHlth": "1=Excellent, 2=Very Good, 3=Good, 4=Fair, 5=Poor.",
+    "HighBP": "0=No history of high blood pressure, 1=Diagnosed with high blood pressure.",
+    "DiffWalk": "0=No difficulty walking or climbing stairs, 1=Difficulty present.",
+    "BMI": "Body Mass Index (weight/height²). Typical healthy adult range is 18.5-24.9.",
+    "HighChol": "0=No high cholesterol diagnosis, 1=Diagnosed with high cholesterol.",
+    "Age": "Categories: 1=18-24, 2=25-29, 3=30-34, 4=35-39, 5=40-44, 6=45-49, 7=50-54, 8=55-59, 9=60-64, 10=65-69, 11=70-74, 12=75-79, 13=80+.",
+    "HeartDiseaseorAttack": "0=No prior heart disease/attack, 1=History of heart disease or heart attack.",
+    "PhysHlth": "Number of poor physical health days in the past 30 days (0-30).",
+    "Income": "1=<10K, 2=10-15K, 3=15-20K, 4=20-25K, 5=25-35K, 6=35-50K, 7=50-75K, 8=>75K.",
+    "Education": "1=Never attended/Kindergarten only, 2=Grades 1-8, 3=Grades 9-11, 4=High school/GED, 5=Some college, 6=College graduate.",
+    "PhysActivity": "0=No physical activity in past 30 days, 1=Performed physical activity or exercise."
+}
+
 # Default averages (fallback if file not found or missing features)
 # Based on BRFSS 2015 diabetic population averages
 DEFAULT_DIABETIC_AVERAGES = {
@@ -127,21 +141,13 @@ def load_model(model_path: str):
                 with open(model_path, 'rb') as f:
                     model = pickle.load(f)
         
-        # Debug: Show what was loaded
-        st.info(f"🔍 Loaded object type: {type(model)}")
-        st.info(f"🔍 Object has predict method: {hasattr(model, 'predict')}")
-        
         # Check if it's a dict or other container
         if isinstance(model, dict):
-            st.warning("⚠️ Loaded a dictionary. Showing keys:")
-            st.code(str(list(model.keys())))
             # Try to find the pipeline in the dict
             if 'pipeline' in model:
                 model = model['pipeline']
-                st.info("✅ Found 'pipeline' key, extracting it")
             elif 'model' in model:
                 model = model['model']
-                st.info("✅ Found 'model' key, extracting it")
             else:
                 st.error("❌ Could not find pipeline in dictionary")
                 return None
@@ -171,21 +177,7 @@ def load_model(model_path: str):
                                        else FEATURE_CONFIGS[f]["default"] 
                                        for f in test_features}])
             
-            st.info(f"🧪 Testing prediction with data shape: {test_data.shape}")
             _ = model.predict(test_data)
-            
-            pipeline_type = "imblearn Pipeline" if is_imblearn_pipeline else "sklearn Pipeline" if is_sklearn_pipeline else "Bare estimator"
-            st.success(f"✅ Model loaded successfully (sklearn v{sklearn.__version__})")
-            st.info(f"📊 Model type: {pipeline_type}")
-            
-            # Show pipeline steps if applicable
-            if is_pipeline:
-                with st.expander("🔍 View Pipeline Steps", expanded=False):
-                    steps_info = "\n".join([f"{i+1}. {name}: {type(step).__name__}" 
-                                           for i, (name, step) in enumerate(model.steps)])
-                    st.code(steps_info)
-                    if is_imblearn_pipeline:
-                        st.info("ℹ️ SMOTEENN sampler is only active during training, not prediction")
             
             return model
         except Exception as pred_error:
@@ -298,6 +290,7 @@ CONVERSATION STYLE:
 - Provide specific, actionable suggestions
 - Ask clarifying questions when helpful
 - Acknowledge emotions and concerns
+- Keep every response within 200 words unless the user asks for more detail
 
 Begin by providing a gentle, contextual interpretation of their {prediction_prob:.1f}% risk probability and offer to answer any questions."""
 
@@ -322,9 +315,13 @@ def create_comparison_chart(user_data: Dict[str, float],
         name='Your Values',
         x=features,
         y=user_values,
-        marker_color='#FF6B6B',
+        marker=dict(
+            color='#2563EB',
+            line=dict(color='#1E3A8A', width=1.2)
+        ),
         text=[f'{v:.1f}' for v in user_values],
-        textposition='outside'
+        textposition='outside',
+        textfont=dict(color='#0f172a', size=13, family='"Inter","Segoe UI",sans-serif')
     ))
     
     # Average diabetic values
@@ -332,9 +329,13 @@ def create_comparison_chart(user_data: Dict[str, float],
         name='Avg. Diabetic Population',
         x=features,
         y=avg_values,
-        marker_color='#4ECDC4',
+        marker=dict(
+            color='#A855F7',
+            line=dict(color='#6D28D9', width=1.2)
+        ),
         text=[f'{v:.1f}' for v in avg_values],
-        textposition='outside'
+        textposition='outside',
+        textfont=dict(color='#0f172a', size=13, family='"Inter","Segoe UI",sans-serif')
     ))
     
     fig.update_layout(
@@ -345,7 +346,33 @@ def create_comparison_chart(user_data: Dict[str, float],
         height=500,
         hovermode='x unified',
         showlegend=True,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1,
+            bgcolor='rgba(255,255,255,0.85)',
+            bordercolor='#dbeafe',
+            borderwidth=1
+        ),
+        uniformtext=dict(mode="show", minsize=12),
+        paper_bgcolor='#f1f5f9',
+        plot_bgcolor='#ffffff',
+        font=dict(color='#0f172a', family='"Inter","Segoe UI",sans-serif'),
+        margin=dict(l=40, r=40, t=80, b=40)
+    )
+    
+    fig.update_xaxes(
+        tickangle=-35,
+        showgrid=False,
+        linecolor='#cbd5f5',
+        tickfont=dict(color='#0f172a', size=12, family='"Inter","Segoe UI",sans-serif')
+    )
+    fig.update_yaxes(
+        gridcolor='#e2e8f0',
+        zerolinecolor='#cbd5f5',
+        tickfont=dict(color='#0f172a', size=12, family='"Inter","Segoe UI",sans-serif')
     )
     
     return fig, differences
@@ -356,28 +383,40 @@ def create_risk_gauge(probability: float) -> go.Figure:
         mode="gauge+number",
         value=probability,
         domain={'x': [0, 1], 'y': [0, 1]},
-        title={'text': "Diabetes Risk Probability", 'font': {'size': 24}},
-        number={'suffix': "%", 'font': {'size': 48}},
+        title={
+            'text': "Diabetes Risk Probability",
+            'font': {'size': 24, 'color': '#0f172a', 'family': '"Inter","Segoe UI",sans-serif'}
+        },
+        number={'suffix': "%", 'font': {'size': 48, 'color': '#0f172a', 'family': '"Inter","Segoe UI",sans-serif'}},
         gauge={
-            'axis': {'range': [None, 100], 'tickwidth': 1, 'tickcolor': "darkblue"},
-            'bar': {'color': "darkblue"},
-            'bgcolor': "white",
+            'axis': {
+                'range': [None, 100],
+                'tickwidth': 1,
+                'tickcolor': "#0f172a",
+                'tickfont': {'color': '#0f172a', 'family': '"Inter","Segoe UI",sans-serif'}
+            },
+            'bar': {'color': "#2563EB"},
+            'bgcolor': "#ffffff",
             'borderwidth': 2,
-            'bordercolor': "gray",
+            'bordercolor': "#dbeafe",
             'steps': [
-                {'range': [0, 30], 'color': '#90EE90'},
-                {'range': [30, 60], 'color': '#FFD700'},
-                {'range': [60, 100], 'color': '#FF6B6B'}
+                {'range': [0, 30], 'color': '#bfdbfe'},
+                {'range': [30, 60], 'color': '#fde68a'},
+                {'range': [60, 100], 'color': '#fecaca'}
             ],
             'threshold': {
-                'line': {'color': "red", 'width': 4},
+                'line': {'color': "#dc2626", 'width': 4},
                 'thickness': 0.75,
                 'value': probability
             }
         }
     ))
     
-    fig.update_layout(height=300, margin=dict(l=20, r=20, t=60, b=20))
+    fig.update_layout(
+        height=300,
+        margin=dict(l=20, r=20, t=60, b=20),
+        paper_bgcolor='#f1f5f9'
+    )
     return fig
 
 def generate_insights(user_data: Dict[str, float], 
@@ -477,45 +516,162 @@ def main():
         page_icon="🏥",
         layout="wide"
     )
+
+    st.markdown(
+        """
+        <style>
+        :root {
+            color-scheme: light;
+        }
+        body, .stApp {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+            font-family: "Inter", "Segoe UI", sans-serif !important;
+        }
+        div[data-testid="stAppViewContainer"] {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+        }
+        div[data-testid="stHeader"] {
+            background: linear-gradient(90deg, #e0f2fe, #bfdbfe) !important;
+            color: #0f172a !important;
+            border-bottom: 1px solid #cbd5f5 !important;
+        }
+        div[data-testid="stToolbar"] {
+            right: 1rem !important;
+        }
+        .stApp h1, .stApp h2, .stApp h3, .stApp h4 {
+            color: #0f172a !important;
+        }
+        .stApp button[kind="formSubmit"],
+        .stApp button[kind="secondary"],
+        div[data-testid="stButton"] > button {
+            background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+            color: #00000 !important;
+            border-radius: 14px !important;
+            border: 1px solid #c7d2fe !important;
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.25) !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.02em !important;
+        }
+        .stApp button[kind="formSubmit"]:hover,
+        .stApp button[kind="secondary"]:hover,
+        div[data-testid="stButton"] > button:hover {
+            background: linear-gradient(135deg, #1e3a8a, #1d4ed8) !important;
+            transform: translateY(-1px);
+        }
+        .stApp button[kind="formSubmit"]:active,
+        .stApp button[kind="secondary"]:active,
+        div[data-testid="stButton"] > button:active {
+            transform: translateY(0);
+        }
+        form[data-testid="stForm"] {
+            background-color: #ffffff !important;
+            border: 1px solid #dbeafe !important;
+            border-radius: 18px !important;
+            padding: 28px !important;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08) !important;
+        }
+        form[data-testid="stForm"] label,
+        form[data-testid="stForm"] p,
+        form[data-testid="stForm"] span {
+            color: #0f172a !important;
+        }
+        .stApp input, .stApp textarea, div[data-baseweb="input"] input {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border: 1px solid #cbd5f5 !important;
+            border-radius: 12px !important;
+        }
+        div[data-baseweb="select"] > div {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border: 1px solid #cbd5f5 !important;
+            border-radius: 12px !important;
+        }
+        div[data-testid="stNumberInput"] input {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+        div[data-testid="stNumberInput"] button {
+            background-color: #e2e8f0 !important;
+            color: #0f172a !important;
+        }
+        div[data-testid="stChatMessage"] {
+            background-color: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 16px !important;
+            color: #0f172a !important;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        }
+        div[data-testid="stChatMessage"] pre {
+            background-color: #e2e8f0 !important;
+            color: #0f172a !important;
+        }
+        div[data-testid="stChatMessageAvatar"] {
+            background-color: #dbeafe !important;
+        }
+        div[data-testid="stChatInput"] textarea {
+            background-color: #f8fafc !important;
+            color: #0f172a !important;
+            border: 1px solid #cbd5f5 !important;
+            border-radius: 14px !important;
+            box-shadow: 0 8px 18px rgba(14, 23, 42, 0.08) !important;
+        }
+        div[data-testid="stAlert"] {
+            background-color: #e8f2ff !important;
+            color: #0f172a !important;
+            border: 1px solid #bfdbfe !important;
+        }
+        div[data-testid="stExpander"] {
+            background-color: #ffffff !important;
+            border-radius: 16px !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06) !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
     
     initialize_session_state()
     
     # Header
     st.title("🏥 Diabetes Risk Assessment + AI Health Assistant")
     
-    # Show environment info in expander
-    with st.expander("ℹ️ System Information", expanded=False):
-        st.code(f"""
-Python: {os.sys.version.split()[0]}
-Scikit-learn: {sklearn.__version__}
-Streamlit: {st.__version__}
-Model Path: {MODEL_PATH}
-Averages Path: {AVERAGES_PATH}
-        """)
+#     # Show environment info in expander
+#     with st.expander("ℹ️ System Information", expanded=False):
+#         st.code(f"""
+# Python: {os.sys.version.split()[0]}
+# Scikit-learn: {sklearn.__version__}
+# Streamlit: {st.__version__}
+# Model Path: {MODEL_PATH}
+# Averages Path: {AVERAGES_PATH}
+#         """)
     
-    st.markdown("---")
+#     st.markdown("---")
     
     # Check for API key
     api_key = os.getenv("GEMINI_API_KEY")
     model_name = os.getenv("GEMINI_MODEL", "gemini-pro")
     
-    if not api_key:
-        st.error("⚠️ GEMINI_API_KEY environment variable not set. Please set it to use the chatbot feature.")
-        st.stop()
+    # if not api_key:
+    #     st.error("⚠️ GEMINI_API_KEY environment variable not set. Please set it to use the chatbot feature.")
+    #     st.stop()
     
     # Load model and averages
     model = load_model(MODEL_PATH)
-    if model is None:
-        st.error(f"⚠️ Could not load model from {MODEL_PATH}. Please check the file path.")
-        st.stop()
+    # if model is None:
+    #     st.error(f"⚠️ Could not load model from {MODEL_PATH}. Please check the file path.")
+    #     st.stop()
     
     diabetic_averages = load_diabetic_averages(AVERAGES_PATH)
     
     # Initialize Gemini
     gemini_model = initialize_gemini(api_key, model_name)
-    if gemini_model is None:
-        st.error("⚠️ Could not initialize Gemini API. Please check your API key.")
-        st.stop()
+    # if gemini_model is None:
+    #     st.error("⚠️ Could not initialize Gemini API. Please check your API key.")
+    #     st.stop()
     
     # Refresh button
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -561,6 +717,17 @@ Averages Path: {AVERAGES_PATH}
                             label_visibility="collapsed"
                         )
                         user_inputs[feature] = config["options"][idx]
+
+                    info_text = FEATURE_INFO.get(feature)
+                    if not info_text:
+                        if config.get("type") == "select" and config.get("labels"):
+                            info_text = ", ".join(
+                                f"{opt}={label}" for opt, label in zip(config["options"], config["labels"])
+                            )
+                        elif config.get("help"):
+                            info_text = config["help"]
+                    if info_text:
+                        st.caption(info_text)
                 
                 submitted = st.form_submit_button("🔍 Analyze Risk", use_container_width=True)
                 

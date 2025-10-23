@@ -3,7 +3,7 @@ Test script to verify how data flows through your trained pipeline.
 This helps understand the preprocessing steps.
 
 Usage:
-    python test_pipeline.py
+    python test.py
 """
 
 import pandas as pd
