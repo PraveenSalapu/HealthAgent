@@ -22,6 +22,7 @@ from config.settings import (
     CHAT_MODEL_GEMINI,
     FEATURE_NAMES,
     CHAT_MODEL_INFO,
+    AGE_LABELS,
 )
 from models import load_model_components, load_diabetic_averages, DiabetesPredictor
 from agents import AgentManager
@@ -445,12 +446,9 @@ def main():
 
             with metric_col2:
                 age_value = st.session_state.user_data.get('Age', 0)
-                age_labels = {1: "18-24", 2: "25-29", 3: "30-34", 4: "35-39", 5: "40-44",
-                             6: "45-49", 7: "50-54", 8: "55-59", 9: "60-64", 10: "65-69",
-                             11: "70-74", 12: "75-79", 13: "80+"}
                 st.metric(
-                    label="Age Group",
-                    value=age_labels.get(int(age_value), "N/A"),
+                    label="Age Range",
+                    value=AGE_LABELS.get(int(age_value), "N/A"),
                     delta=None
                 )
 

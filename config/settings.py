@@ -23,19 +23,27 @@ AVERAGES_PATH = "model_output2/diabetic_averages.json"
 # FEATURE CONFIGURATIONS
 # ============================================================================
 
+# Age category mapping (for display purposes)
+AGE_LABELS = {
+    1: "18-24", 2: "25-29", 3: "30-34", 4: "35-39", 5: "40-44",
+    6: "45-49", 7: "50-54", 8: "55-59", 9: "60-64", 10: "65-69",
+    11: "70-74", 12: "75-79", 13: "80+"
+}
+
 FEATURE_CONFIGS = {
-    "GenHlth": {"type": "select", "options": [1, 2, 3, 4, 5], 
+    "GenHlth": {"type": "select", "options": [1, 2, 3, 4, 5],
                 "labels": ["Excellent", "Very Good", "Good", "Fair", "Poor"]},
     "HighBP": {"type": "select", "options": [0, 1], "labels": ["No", "Yes"]},
     "DiffWalk": {"type": "select", "options": [0, 1], "labels": ["No", "Yes"]},
     "BMI": {"type": "number", "min": 10.0, "max": 70.0, "default": 25.0, "step": 0.1},
     "HighChol": {"type": "select", "options": [0, 1], "labels": ["No", "Yes"]},
-    "Age": {"type": "number", "min": 1, "max": 13, "default": 7, "step": 1, 
-            "help": "Age category (1=18-24, 2=25-29, ..., 13=80+)"},
+    "Age": {"type": "select",
+            "options": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+            "labels": ["18-24", "25-29", "30-34", "35-39", "40-44", "45-49", "50-54", "55-59", "60-64", "65-69", "70-74", "75-79", "80+"]},
     "HeartDiseaseorAttack": {"type": "select", "options": [0, 1], "labels": ["No", "Yes"]},
     "PhysHlth": {"type": "number", "min": 0, "max": 30, "default": 0, "step": 1,
                  "help": "Days of poor physical health in past 30 days"},
-    "Income": {"type": "select", 
+    "Income": {"type": "select",
                "options": [1, 2, 3, 4, 5, 6, 7, 8],
                "labels": ["<$10k", "$10k-15k", "$15k-20k", "$20k-25k", "$25k-35k", "$35k-50k", "$50k-75k", ">$75k"]},
     "Education": {"type": "select",
@@ -51,7 +59,7 @@ FEATURE_NAMES = {
     "DiffWalk": "Difficulty Walking",
     "BMI": "Body Mass Index",
     "HighChol": "High Cholesterol",
-    "Age": "Age Category",
+    "Age": "Age Range",
     "HeartDiseaseorAttack": "Heart Disease or Attack History",
     "PhysHlth": "Physical Health (poor days/month)",
     "Income": "Income Level",
@@ -65,7 +73,7 @@ FEATURE_INFO = {
     "DiffWalk": "0=No difficulty walking or climbing stairs, 1=Difficulty present.",
     "BMI": "Body Mass Index (weight/height^2). Typical healthy adult range is 18.5-24.9.",
     "HighChol": "0=No high cholesterol diagnosis, 1=Diagnosed with high cholesterol.",
-    "Age": "Categories: 1=18-24, 2=25-29, 3=30-34, 4=35-39, 5=40-44, 6=45-49, 7=50-54, 8=55-59, 9=60-64, 10=65-69, 11=70-74, 12=75-79, 13=80+.",
+    "Age": "Select your age range from the dropdown.",
     "HeartDiseaseorAttack": "0=No prior heart disease/attack, 1=History of heart disease or heart attack.",
     "PhysHlth": "Number of poor physical health days in the past 30 days (0-30).",
     "Income": "1=<10K, 2=10-15K, 3=15-20K, 4=20-25K, 5=25-35K, 6=35-50K, 7=50-75K, 8=>75K.",
