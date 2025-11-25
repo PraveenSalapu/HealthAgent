@@ -211,8 +211,16 @@ DEFAULT_DIABETIC_AVERAGES = {
 # API CONFIGURATION
 # ============================================================================
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+# Try to get API key from Streamlit secrets first (for Streamlit Cloud),
+# then fall back to environment variables (for local development)
+try:
+    import streamlit as st
+    GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", ""))
+    GEMINI_MODEL = st.secrets.get("GEMINI_MODEL", os.getenv("GEMINI_MODEL", "gemini-2.5-flash"))
+except (ImportError, FileNotFoundError, AttributeError):
+    # Streamlit not available or secrets not configured - use environment variables
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+    GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
 # ============================================================================
 # RAG CONFIGURATION
