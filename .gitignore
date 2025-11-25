@@ -66,3 +66,29 @@ htmlcov/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# ====================================
+# Project-specific exclusions
+# ====================================
+
+# Redundant/Alternative app versions (keeping app_modular.py only)
+app.py
+app2.py
+provider_search.py
+
+# Test files
+test.py
+test2.py
+diagnose_model.py
+
+# Old documentation (keeping README_MODULAR.md)
+README.md
+
+# Old/duplicate model outputs (using model_output2/ only)
+model_output/
+preprocessing_pipeline.pkl
+average_diabetic_features.json
+
+# Unused model metadata files
+model_output2/evaluation_metrics.json
+model_output2/feature_config.json
