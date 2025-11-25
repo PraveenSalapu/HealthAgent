@@ -11,7 +11,7 @@ This agent uses Google's Gemini API to provide:
 from typing import Dict, List, Optional
 import google.generativeai as genai
 
-from agents.base_agent import BaseAgent
+from .base_agent import BaseAgent
 from config.settings import GEMINI_API_KEY, GEMINI_MODEL, CHAT_MODEL_INFO, CHAT_MODEL_GEMINI
 
 

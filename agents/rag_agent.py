@@ -14,7 +14,7 @@ from pathlib import Path
 
 import google.generativeai as genai
 
-from agents.base_agent import BaseAgent
+from .base_agent import BaseAgent
 from config.settings import (
     GEMINI_API_KEY,
     GEMINI_MODEL,

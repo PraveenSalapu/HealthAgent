@@ -9,9 +9,9 @@ This module manages:
 """
 
 from typing import Dict, List, Optional
-from agents.base_agent import BaseAgent
-from agents.gemini_agent import GeminiAgent
-from agents.rag_agent import RAGAgent
+from .base_agent import BaseAgent
+from .gemini_agent import GeminiAgent
+from .rag_agent import RAGAgent
 from config.settings import CHAT_MODEL_GEMINI, CHAT_MODEL_RAG
 from utils.helpers import build_profile_summary, classify_risk
 
