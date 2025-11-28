@@ -2,7 +2,7 @@ streamlit
 pandas
 numpy
 plotly
-google-generativeai
+google-generativeai==0.3.2
 joblib
 xgboost
 imbalanced-learn
@@ -10,5 +10,15 @@ requests
 
 # Multi-agent chatbot dependencies
 langchain
-chromadb
-sentence-transformers
+langchain-community
+langchain-huggingface
+langchain-qdrant
+qdrant-client==1.7.0
+sentence-transformers==2.3.1
+faiss-cpu
+PyPDF2==3.0.1
+torch>=2.2.0  # torch==2.1.0 not available for this env
+
+# Phase 2: Advanced RAG improvements
+rank-bm25  # Sparse keyword retrieval
+transformers  # For cross-encoder re-ranking

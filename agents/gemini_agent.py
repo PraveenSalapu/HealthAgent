@@ -27,10 +27,23 @@ class GeminiAgent(BaseAgent):
             description=info["description"]
         )
         self.model = None
-        # Try to get API key from environment if not in settings
-        self.api_key = GEMINI_API_KEY or os.getenv("GEMINI_API_KEY", "")
+        # Try to get API key from Streamlit secrets first, then settings, then environment
+        self.api_key = self._get_api_key()
         self.model_name = GEMINI_MODEL
         self.capabilities = info["capabilities"]
+
+    def _get_api_key(self):
+        """Get API key from various sources."""
+        import os
+        # Try Streamlit secrets first
+        try:
+            import streamlit as st
+            if hasattr(st, 'secrets') and "GEMINI_API_KEY" in st.secrets:
+                return st.secrets["GEMINI_API_KEY"]
+        except Exception:
+            pass
+        # Fall back to settings constant or environment variable
+        return GEMINI_API_KEY or os.getenv("GEMINI_API_KEY", "")
     
     def initialize(self, **kwargs) -> bool:
         """
@@ -47,7 +60,7 @@ class GeminiAgent(BaseAgent):
             model_name = kwargs.get("model_name", self.model_name)
             
             if not api_key:
-                print("⚠️ Gemini API key not found. Set GEMINI_API_KEY environment variable.")
+                print("[WARNING] Gemini API key not found. Set GEMINI_API_KEY environment variable.")
                 print("   Example: $env:GEMINI_API_KEY='your_key_here'")
                 return False
             
@@ -56,7 +69,7 @@ class GeminiAgent(BaseAgent):
             self.is_initialized = True
             return True
         except Exception as e:
-            print(f"❌ Error initializing Gemini agent: {e}")
+            print(f"[ERROR] Error initializing Gemini agent: {e}")
             self.is_initialized = False
             return False
     

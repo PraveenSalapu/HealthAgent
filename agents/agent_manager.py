@@ -36,18 +36,18 @@ class AgentManager:
         gemini_agent = GeminiAgent()
         if gemini_agent.initialize():
             self.agents[CHAT_MODEL_GEMINI] = gemini_agent
-            print(f"✅ {gemini_agent.name} initialized")
+            print(f"[OK] {gemini_agent.name} initialized")
         else:
-            print(f"⚠️ {gemini_agent.name} initialization failed")
+            print(f"[WARNING] {gemini_agent.name} initialization failed")
             self.agents[CHAT_MODEL_GEMINI] = gemini_agent  # Add anyway for fallback
-        
+
         # Initialize RAG agent
         rag_agent = RAGAgent()
         if rag_agent.initialize():
             self.agents[CHAT_MODEL_RAG] = rag_agent
-            print(f"✅ {rag_agent.name} initialized")
+            print(f"[OK] {rag_agent.name} initialized")
         else:
-            print(f"⚠️ {rag_agent.name} initialization failed")
+            print(f"[WARNING] {rag_agent.name} initialization failed")
             self.agents[CHAT_MODEL_RAG] = rag_agent  # Add anyway for fallback
     
     def set_prediction_context(self, probability: float, user_data: Dict[str, float]):

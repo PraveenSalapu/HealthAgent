@@ -79,7 +79,12 @@ provider_search.py
 # Test files
 test.py
 test2.py
+test.txt
 diagnose_model.py
+test_improved_rag.py
+test_phase2_rag.py
+verify_rag.py
+reindex_documents.py
 
 # Old documentation (keeping README_MODULAR.md)
 README.md
@@ -92,3 +97,6 @@ average_diabetic_features.json
 # Unused model metadata files
 model_output2/evaluation_metrics.json
 model_output2/feature_config.json
+
+# Data files (clinical documents - too large for git)
+data/

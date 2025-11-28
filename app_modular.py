@@ -125,6 +125,23 @@ def main():
         # Show agent status
         render_agent_status(st.session_state.agent_manager)
 
+        # Knowledge Base Management (Only for RAG Agent)
+        if st.session_state.active_chat_model == "rag":
+            st.sidebar.markdown("---")
+            st.sidebar.markdown("### 📚 Knowledge Base")
+            
+            if st.sidebar.button("🔄 Sync/Re-index Documents", help="Upload new files from data/clinical_docs to Qdrant"):
+                with st.spinner("Indexing documents..."):
+                    agent = st.session_state.agent_manager.get_active_agent()
+                    if agent and hasattr(agent, "index_documents"):
+                        status = agent.index_documents()
+                        if "Error" in status:
+                            st.sidebar.error(status)
+                        else:
+                            st.sidebar.success(status)
+                    else:
+                        st.sidebar.error("Agent does not support indexing.")
+
     # Hero Header CSS
     st.markdown("""
     <style>

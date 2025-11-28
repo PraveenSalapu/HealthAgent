@@ -211,27 +211,91 @@ DEFAULT_DIABETIC_AVERAGES = {
 # API CONFIGURATION
 # ============================================================================
 
-# Try to get API key from Streamlit secrets first (for Streamlit Cloud),
-# then fall back to environment variables (for local development)
-try:
-    import streamlit as st
-    GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", os.getenv("GEMINI_API_KEY", ""))
-    GEMINI_MODEL = st.secrets.get("GEMINI_MODEL", os.getenv("GEMINI_MODEL", "gemini-2.5-flash"))
-except (ImportError, FileNotFoundError, AttributeError):
-    # Streamlit not available or secrets not configured - use environment variables
-    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-    GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+def get_api_key():
+    """Get API key from Streamlit secrets or environment variables."""
+    try:
+        import streamlit as st
+        if hasattr(st, 'secrets') and "GEMINI_API_KEY" in st.secrets:
+            return st.secrets["GEMINI_API_KEY"]
+    except Exception:
+        pass
+    return os.getenv("GEMINI_API_KEY", "")
+
+def get_model_name():
+    """Get model name from Streamlit secrets or environment variables."""
+    try:
+        import streamlit as st
+        if hasattr(st, 'secrets') and "GEMINI_MODEL" in st.secrets:
+            return st.secrets["GEMINI_MODEL"]
+    except Exception:
+        pass
+    return os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+
+# Initialize with environment variables, will be updated at runtime
+GEMINI_API_KEY = get_api_key()
+GEMINI_MODEL = get_model_name()
 
 # ============================================================================
 # RAG CONFIGURATION
 # ============================================================================
 
-RAG_VECTOR_STORE = "chromadb"  # Options: "chromadb", "faiss"
-RAG_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+def get_qdrant_url():
+    """Get Qdrant URL from Streamlit secrets or environment variables."""
+    try:
+        import streamlit as st
+        if hasattr(st, 'secrets') and "QDRANT_URL" in st.secrets:
+            return st.secrets["QDRANT_URL"]
+    except Exception:
+        pass
+    return os.getenv("QDRANT_URL", "")
+
+def get_qdrant_api_key():
+    """Get Qdrant API key from Streamlit secrets or environment variables."""
+    try:
+        import streamlit as st
+        if hasattr(st, 'secrets') and "QDRANT_API_KEY" in st.secrets:
+            return st.secrets["QDRANT_API_KEY"]
+    except Exception:
+        pass
+    return os.getenv("QDRANT_API_KEY", "")
+
+# Vector store configuration
+RAG_VECTOR_STORE = "qdrant"  # Options: "qdrant", "chromadb", "faiss"
+
+# Embedding model options (Phase 2: Can use medical-specific embeddings)
+RAG_EMBEDDING_OPTIONS = {
+    "general": "sentence-transformers/all-MiniLM-L6-v2",  # Fast, general-purpose (384 dim)
+    "medical": "pritamdeka/BioBERT-mnli-snli-scinli-scitail-mednli-stsb",  # Medical-specific (768 dim)
+    "balanced": "sentence-transformers/all-mpnet-base-v2",  # Better general model (768 dim)
+}
+
+# Current embedding model (change to "medical" or "balanced" for better medical accuracy)
+RAG_EMBEDDING_MODEL = RAG_EMBEDDING_OPTIONS["general"]  # Default: fast general model
+
+# Chunking configuration
 RAG_CHUNK_SIZE = 1000
 RAG_CHUNK_OVERLAP = 200
-RAG_TOP_K = 3  # Number of documents to retrieve
+
+# Retrieval configuration
+RAG_TOP_K = 3  # Number of documents to retrieve (final count after filtering/re-ranking)
+RAG_INITIAL_K = 10  # Initial retrieval count (before re-ranking)
+
+# Phase 2: Advanced retrieval settings
+RAG_USE_HYBRID_SEARCH = True  # Enable semantic + keyword (BM25) hybrid search
+RAG_HYBRID_ALPHA = 0.7  # Weight for semantic search (0=pure keyword, 1=pure semantic, 0.7=70% semantic)
+RAG_USE_RERANKING = True  # Enable cross-encoder re-ranking
+RAG_RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"  # Cross-encoder for re-ranking
+RAG_MIN_RELEVANCE_SCORE = 0.65  # Minimum similarity score threshold
+
+# Local paths (for document loading)
 CLINICAL_DOCS_PATH = "data/clinical_docs"
+
+# Qdrant configuration
+QDRANT_URL = get_qdrant_url()
+QDRANT_API_KEY = get_qdrant_api_key()
+QDRANT_COLLECTION_NAME = "clinical_docs"
+
+# Legacy ChromaDB path (for migration reference)
 CHROMA_PERSIST_DIR = "data/chroma_db"
 
 # ============================================================================
