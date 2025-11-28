@@ -86,8 +86,8 @@ test_phase2_rag.py
 verify_rag.py
 reindex_documents.py
 
-# Old documentation (keeping README_MODULAR.md)
-README.md
+# Old documentation (deprecated - using README.md as single source)
+README_MODULAR.md
 
 # Old/duplicate model outputs (using model_output2/ only)
 model_output/
