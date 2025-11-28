@@ -14,10 +14,12 @@ langchain-community
 langchain-huggingface
 langchain-qdrant
 qdrant-client==1.7.0
-sentence-transformers==2.3.1
+
 faiss-cpu
 PyPDF2==3.0.1
-torch>=2.2.0  # torch==2.1.0 not available for this env
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+sentence-transformers==2.3.1
 
 # Phase 2: Advanced RAG improvements
 rank-bm25  # Sparse keyword retrieval

@@ -430,7 +430,7 @@ class RAGAgent(BaseAgent):
             # Create FAISS vector store (in-memory)
             self.vectorstore = FAISS.from_documents(
                 documents=splits,
-                embedding=self.embeddings,
+                embeddings=self.embeddings,
             )
             self.docs_loaded = True
             print(f"[OK] Indexed {len(splits)} document chunks from {len(documents)} documents using FAISS (local mode)")
