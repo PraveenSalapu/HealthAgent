@@ -92,11 +92,6 @@ GEMINI_API_KEY=your_gemini_api_key_here
 streamlit run app_modular.py
 ```
 
-### Run the legacy application
-```bash
-streamlit run app2.py
-```
-
 ## 🤖 Multi-Agent System
 
 ### Gemini Agent
