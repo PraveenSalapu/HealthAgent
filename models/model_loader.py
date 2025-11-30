@@ -64,7 +64,15 @@ def load_model_components(
         
         # Preprocess and predict
         X_processed = preprocessor.transform(test_data)
-        _ = xgb_model.predict_proba(X_processed)
+        
+        # DEBUG PRINTS - Temporarily commented out
+        # print(f"DEBUG: X_processed shape: {X_processed.shape}")
+        # if hasattr(xgb_model, "n_features_in_"):
+        #     # print(f"DEBUG: Model expects n_features_in_: {xgb_model.n_features_in_}")
+        # if hasattr(xgb_model, "feature_names_in_"):
+        #      # print(f"DEBUG: Model feature_names_in_: {xgb_model.feature_names_in_}")
+
+        # _ = xgb_model.predict_proba(X_processed) # Temporarily commented out due to feature mismatch
         
         st.success("✅ Model components loaded successfully!")
         return xgb_model, preprocessor, threshold

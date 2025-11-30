@@ -14,10 +14,13 @@ import os
 # MODEL PATHS
 # ============================================================================
 
-MODEL_JSON_PATH = "model_output2/xgboost_model.json"
-PREPROCESSOR_PATH = "model_output2/preprocessor.pkl"
-THRESHOLD_PATH = "model_output2/optimal_threshold.json"
-AVERAGES_PATH = "model_output2/diabetic_averages.json"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODEL_DIR = os.path.join(BASE_DIR, "model_output")
+
+MODEL_JSON_PATH = os.path.join(MODEL_DIR, "xgboost_model.json")
+PREPROCESSOR_PATH = os.path.join(MODEL_DIR, "preprocessor.pkl")
+THRESHOLD_PATH = os.path.join(MODEL_DIR, "optimal_threshold.json")
+AVERAGES_PATH = os.path.join(MODEL_DIR, "diabetic_averages.json")
 
 # ============================================================================
 # FEATURE CONFIGURATIONS
@@ -309,37 +312,37 @@ CHAT_MODEL_LIGHTWEIGHT_RAG = "lightweight_rag"
 
 CHAT_MODEL_INFO = {
     CHAT_MODEL_GEMINI: {
-        "name": "Gemini Agent",
-        "icon": "🤖",
-        "description": "Generic health insights & lifestyle recommendations",
+        "name": "Gemini Health Coach",
+        "icon": "💫",
+        "description": "AI-powered health insights & personalized lifestyle coaching",
         "capabilities": [
-            "General health advice",
-            "Lifestyle recommendations",
-            "Motivational support",
-            "Wellness coaching"
+            "🏃 General health & wellness advice",
+            "🥗 Lifestyle & nutrition recommendations",
+            "💪 Motivational support & accountability",
+            "🎯 Personalized wellness coaching"
         ]
     },
-    CHAT_MODEL_RAG: {
-        "name": "RAG Agent (LangChain)",
-        "icon": "📚",
-        "description": "Clinical insights from medical literature (heavy dependencies)",
-        "capabilities": [
-            "Evidence-based clinical information",
-            "Medical literature references",
-            "Research-backed recommendations",
-            "Source citations"
-        ]
-    },
+    # CHAT_MODEL_RAG: {
+    #     "name": "RAG Agent (LangChain)",
+    #     "icon": "📚",
+    #     "description": "Clinical insights from medical literature (heavy dependencies)",
+    #     "capabilities": [
+    #         "Evidence-based clinical information",
+    #         "Medical literature references",
+    #         "Research-backed recommendations",
+    #         "Source citations"
+    #     ]
+    # },
     CHAT_MODEL_LIGHTWEIGHT_RAG: {
-        "name": "Lightweight RAG Agent",
-        "icon": "⚡",
-        "description": "Clinical insights using API-based embeddings (cloud-friendly)",
+        "name": "Clinical Research Assistant",
+        "icon": "🔬",
+        "description": "Evidence-based clinical insights from medical research & guidelines",
         "capabilities": [
-            "Evidence-based clinical information",
-            "Medical literature references",
-            "Research-backed recommendations",
-            "Source citations",
-            "Optimized for Streamlit Cloud"
+            "🩺 Evidence-based clinical information",
+            "📊 Medical literature & research references",
+            "✅ Guidelines-backed recommendations",
+            "📖 Source citations & studies",
+            "⚡ Cloud-optimized performance"
         ]
     }
 }

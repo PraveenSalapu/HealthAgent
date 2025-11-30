@@ -43,9 +43,6 @@ try:
     from .retrieval_components import (
         BM25Retriever,
         HybridRetriever,
-        CrossEncoderReranker,
-        CitationValidator,
-        QueryExpander
     )
     PHASE2_AVAILABLE = True
 except ImportError as e:
@@ -76,9 +73,6 @@ class RAGAgent(BaseAgent):
         # Phase 2: Advanced retrieval components
         self.bm25_retriever = None
         self.hybrid_retriever = None
-        self.reranker = None
-        self.citation_validator = None
-        self.query_expander = None
         self.use_phase2 = PHASE2_AVAILABLE
 
     def _get_api_key(self):
@@ -542,23 +536,6 @@ amounts of activity (10-minute walks after meals) can improve blood glucose cont
 
         print("[INFO] Initializing Phase 2 components...")
 
-        # Initialize citation validator
-        self.citation_validator = CitationValidator()
-        print("[OK] Citation validator initialized")
-
-        # Initialize query expander
-        self.query_expander = QueryExpander()
-        print("[OK] Query expander initialized")
-
-        # Initialize re-ranker if enabled
-        if RAG_USE_RERANKING:
-            try:
-                self.reranker = CrossEncoderReranker(model_name=RAG_RERANKER_MODEL)
-                print("[OK] Cross-encoder re-ranker initialized")
-            except Exception as e:
-                print(f"[WARNING] Re-ranker initialization failed: {e}")
-                self.reranker = None
-
         # Initialize BM25 and hybrid retriever if enabled
         if RAG_USE_HYBRID_SEARCH and self.vectorstore:
             try:
@@ -644,30 +621,15 @@ amounts of activity (10-minute walks after meals) can improve blood glucose cont
             return self._generate_fallback_response(message, context)
 
         try:
-            # Phase 2: Query expansion
-            queries = [message]
-            if self.use_phase2 and self.query_expander:
-                queries = self.query_expander.expand(message, max_expansions=3)
-                if len(queries) > 1:
-                    print(f"[INFO] Query expanded to {len(queries)} variations")
-
             # Retrieve relevant documents
             if self.use_phase2 and RAG_USE_HYBRID_SEARCH and self.hybrid_retriever:
                 # Phase 2: Hybrid retrieval (semantic + BM25)
                 print("[INFO] Using hybrid retrieval (semantic + BM25)")
-                all_docs = []
-                for query in queries:
-                    docs_with_scores = self.hybrid_retriever.retrieve(query, k=RAG_INITIAL_K)
-                    all_docs.extend(docs_with_scores)
-                # Deduplicate
-                seen = set()
-                unique_docs = []
-                for doc, score in all_docs:
-                    doc_id = id(doc)
-                    if doc_id not in seen:
-                        seen.add(doc_id)
-                        unique_docs.append((doc, score))
-                relevant_docs_with_scores = unique_docs[:RAG_INITIAL_K * 2]
+                
+                # Retrieve documents
+                docs_with_scores = self.hybrid_retriever.retrieve(message, k=RAG_INITIAL_K)
+                
+                relevant_docs_with_scores = docs_with_scores[:RAG_INITIAL_K * 2]
             else:
                 # Phase 1: Semantic-only retrieval
                 relevant_docs_with_scores = self.vectorstore.similarity_search_with_score(
@@ -685,14 +647,8 @@ amounts of activity (10-minute walks after meals) can improve blood glucose cont
                 print("[WARNING] No relevant documents found above quality threshold")
                 return self._generate_fallback_response(message, context)
 
-            # Phase 2: Re-ranking with cross-encoder
-            if self.use_phase2 and RAG_USE_RERANKING and self.reranker:
-                print(f"[INFO] Re-ranking {len(filtered_docs)} documents with cross-encoder")
-                reranked_docs = self.reranker.rerank(message, filtered_docs, top_k=RAG_TOP_K)
-                top_docs = reranked_docs
-            else:
-                # Take top K after filtering
-                top_docs = filtered_docs[:RAG_TOP_K]
+            # Take top K after filtering
+            top_docs = filtered_docs[:RAG_TOP_K]
 
             # Extract just the documents (without scores)
             docs_only = [doc for doc, score in top_docs]
@@ -708,13 +664,6 @@ amounts of activity (10-minute walks after meals) can improve blood glucose cont
             if self.model:
                 response = self.model.generate_content(prompt)
                 response_text = response.text
-
-                # Phase 2: Validate citations
-                if self.use_phase2 and self.citation_validator:
-                    validation = self.citation_validator.validate(response_text, docs_only)
-                    validation_summary = self.citation_validator.get_validation_summary(validation)
-                    print(f"[VALIDATION] {validation_summary}")
-
                 return response_text
             else:
                 return self._generate_fallback_response(message, context)

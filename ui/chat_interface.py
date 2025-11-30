@@ -9,7 +9,7 @@ This module provides:
 
 import streamlit as st
 from typing import Dict, List, Optional
-from config.settings import CHAT_MODEL_INFO, CHAT_MODEL_GEMINI, CHAT_MODEL_RAG
+from config.settings import CHAT_MODEL_INFO, CHAT_MODEL_GEMINI  # CHAT_MODEL_RAG removed - not in use
 
 
 def render_model_selector(current_model: str) -> str:
@@ -26,15 +26,21 @@ def render_model_selector(current_model: str) -> str:
     
     # Create radio button for model selection
     model_options = {
-        CHAT_MODEL_GEMINI: f"{CHAT_MODEL_INFO[CHAT_MODEL_GEMINI]['icon']} {CHAT_MODEL_INFO[CHAT_MODEL_GEMINI]['name']}",
-        CHAT_MODEL_RAG: f"{CHAT_MODEL_INFO[CHAT_MODEL_RAG]['icon']} {CHAT_MODEL_INFO[CHAT_MODEL_RAG]['name']}"
+        k: f"{v['icon']} {v['name']}"
+        for k, v in CHAT_MODEL_INFO.items()
     }
     
+    options = list(model_options.keys())
+    try:
+        index = options.index(current_model)
+    except ValueError:
+        index = 0
+
     selected = st.sidebar.radio(
         "Select chat model:",
-        options=list(model_options.keys()),
+        options=options,
         format_func=lambda x: model_options[x],
-        index=0 if current_model == CHAT_MODEL_GEMINI else 1,
+        index=index,
         key="model_selector"
     )
     
