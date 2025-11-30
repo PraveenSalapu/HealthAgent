@@ -104,23 +104,28 @@ def create_feature_importance_chart(feature_importance: Dict[str, float],
     fig.update_layout(
         title=dict(
             text="🎯 What Drives Your Risk Score? (Model's Top Factors)",
-            font=dict(size=18, color='#f1f5f9', family='"Inter","Segoe UI",sans-serif', weight=700)
+            font=dict(size=18, color='#f1f5f9', family='"Inter","Segoe UI",sans-serif', weight=700),
+            x=0.5,
+            xanchor='center',
+            pad=dict(t=15, b=20)
         ),
         xaxis=dict(
             title=dict(
                 text="Model Importance (%)",
-                font=dict(color='#94a3b8', size=13)
+                font=dict(color='#94a3b8', size=13),
+                standoff=20
             ),
             gridcolor="rgba(100, 116, 255, 0.15)",
             tickfont=dict(color='#cbd5e1', size=11),
-            range=[0, max(importances) * 1.2]
+            range=[0, max(importances) * 1.3]
         ),
         yaxis=dict(
-            tickfont=dict(color='#cbd5e1', size=12, family='"Inter","Segoe UI",sans-serif'),
-            autorange="reversed"
+            tickfont=dict(color='#cbd5e1', size=13, family='"Inter","Segoe UI",sans-serif'),
+            autorange="reversed",
+            automargin=True
         ),
-        height=450,
-        margin=dict(l=200, r=80, t=80, b=60),
+        height=520,
+        margin=dict(l=250, r=120, t=100, b=90),
         paper_bgcolor="rgba(10, 14, 26, 0.5)",
         plot_bgcolor="rgba(21, 29, 53, 0.5)",
         font=dict(color="#cbd5e1", family='"Inter","Segoe UI",sans-serif'),
@@ -129,7 +134,7 @@ def create_feature_importance_chart(feature_importance: Dict[str, float],
             dict(
                 text="🔴 Red = Higher risk than average | 🟢 Green = Lower risk than average",
                 xref="paper", yref="paper",
-                x=0.5, y=-0.12,
+                x=0.5, y=-0.14,
                 showarrow=False,
                 font=dict(size=11, color='#94a3b8'),
                 xanchor='center'
@@ -189,46 +194,50 @@ def create_top_factors_comparison(user_data: Dict[str, float],
     fig.update_layout(
         title=dict(
             text='Your Top Risk Factors vs. Average',
-            font=dict(size=16, color='#f1f5f9', family='"Inter","Segoe UI",sans-serif', weight=700),
+            font=dict(size=17, color='#f1f5f9', family='"Inter","Segoe UI",sans-serif', weight=700),
             x=0.5,
-            xanchor='center'
+            xanchor='center',
+            pad=dict(t=15, b=20)
         ),
         xaxis_title=dict(
             text='Key Health Factors',
-            font=dict(size=12, color='#94a3b8')
+            font=dict(size=12, color='#94a3b8'),
+            standoff=20
         ),
         yaxis_title=dict(
             text='Value',
-            font=dict(size=12, color='#94a3b8')
+            font=dict(size=12, color='#94a3b8'),
+            standoff=15
         ),
         barmode='group',
-        height=500,
+        height=580,
         hovermode='x unified',
         showlegend=True,
         legend=dict(
             orientation="h",
             yanchor="top",
-            y=-0.15,
+            y=-0.22,
             xanchor="center",
             x=0.5,
             bgcolor='rgba(26, 35, 66, 0.85)',
             bordercolor='rgba(100, 116, 255, 0.3)',
             borderwidth=1.5,
-            font=dict(color='#cbd5e1', size=11)
+            font=dict(color='#cbd5e1', size=12)
         ),
         paper_bgcolor='rgba(10, 14, 26, 0.5)',
         plot_bgcolor='rgba(21, 29, 53, 0.5)',
         font=dict(color='#cbd5e1', family='"Inter","Segoe UI",sans-serif'),
-        margin=dict(l=50, r=30, t=60, b=100),
-        bargap=0.2,
-        bargroupgap=0.1
+        margin=dict(l=80, r=60, t=90, b=150),
+        bargap=0.25,
+        bargroupgap=0.12
     )
 
     fig.update_xaxes(
-        tickangle=-20,
+        tickangle=-30,
         showgrid=False,
         linecolor='rgba(100, 116, 255, 0.2)',
-        tickfont=dict(color='#cbd5e1', size=11, family='"Inter","Segoe UI",sans-serif')
+        tickfont=dict(color='#cbd5e1', size=12, family='"Inter","Segoe UI",sans-serif'),
+        automargin=True
     )
     fig.update_yaxes(
         gridcolor='rgba(100, 116, 255, 0.15)',
@@ -305,91 +314,97 @@ def create_risk_simulator_data(user_data: Dict[str, float],
 
 def create_risk_simulator_chart(simulator_data: Dict) -> go.Figure:
     """
-    Create interactive risk simulator showing potential improvements.
+    Create horizontal bullet chart showing potential risk improvements.
+    More intuitive than dual-axis - shows current vs potential risk as horizontal bars.
     """
     scenarios = simulator_data['scenarios'][:5]  # Top 5
     baseline = simulator_data['baseline_risk']
 
-    features = [s['feature_name'] for s in scenarios]
-    impacts = [s['impact'] for s in scenarios]
-    improved_risks = [s['improved_risk'] for s in scenarios]
+    # Reverse order so most impactful is on top
+    scenarios = list(reversed(scenarios))
 
-    # Create figure with secondary y-axis
+    features = [s['feature_name'] for s in scenarios]
+    current_risks = [baseline] * len(scenarios)
+    improved_risks = [s['improved_risk'] for s in scenarios]
+    impacts = [s['impact'] for s in scenarios]
+
     fig = go.Figure()
 
-    # Impact bars
+    # Background bar (100% scale)
     fig.add_trace(go.Bar(
-        name='Potential Risk Reduction',
-        x=features,
-        y=impacts,
+        name='Risk Scale',
+        y=features,
+        x=[100] * len(features),
+        orientation='h',
         marker=dict(
-            color=['#10b981' if i > 0 else '#f87171' for i in impacts],
-            line=dict(color='rgba(255, 255, 255, 0.3)', width=1)
+            color='rgba(30, 41, 59, 0.3)',
+            line=dict(width=0)
         ),
-        text=[f'-{i:.1f}%' if i > 0 else f'+{abs(i):.1f}%' for i in impacts],
-        textposition='outside',
-        textfont=dict(color='#f1f5f9', size=12, family='"Inter","Segoe UI",sans-serif', weight=600),
-        yaxis='y',
-        hovertemplate='<b>%{x}</b><br>Risk Reduction: %{y:.1f}%<extra></extra>'
+        showlegend=False,
+        hoverinfo='skip'
     ))
 
-    # Baseline line
-    fig.add_trace(go.Scatter(
-        name=f'Current Risk ({baseline:.1f}%)',
-        x=features,
-        y=[baseline] * len(features),
-        mode='lines',
-        line=dict(color='#00d9ff', width=2, dash='dash'),
-        yaxis='y2',
-        hovertemplate='<b>Current Risk</b>: %{y:.1f}%<extra></extra>'
+    # Current risk bars (semi-transparent)
+    fig.add_trace(go.Bar(
+        name=f'Current Risk',
+        y=features,
+        x=current_risks,
+        orientation='h',
+        marker=dict(
+            color='rgba(239, 68, 68, 0.6)',
+            line=dict(color='#ef4444', width=2)
+        ),
+        text=[f'{baseline:.1f}%'] * len(features),
+        textposition='inside',
+        textfont=dict(color='#ffffff', size=11, weight=700),
+        hovertemplate='<b>%{y}</b><br>Current Risk: %{x:.1f}%<extra></extra>'
     ))
 
-    # Improved risk line
-    fig.add_trace(go.Scatter(
-        name='Potential New Risk',
-        x=features,
-        y=improved_risks,
-        mode='lines+markers',
-        line=dict(color='#10b981', width=3),
-        marker=dict(size=10, symbol='diamond'),
-        yaxis='y2',
-        hovertemplate='<b>Improved Risk</b>: %{y:.1f}%<extra></extra>'
+    # Potential improved risk bars
+    fig.add_trace(go.Bar(
+        name='Potential Risk (If Improved)',
+        y=features,
+        x=improved_risks,
+        orientation='h',
+        marker=dict(
+            color='#10b981',
+            line=dict(color='rgba(255, 255, 255, 0.3)', width=1.5),
+            pattern=dict(shape="/", solidity=0.3)
+        ),
+        text=[f'{r:.1f}% (↓{i:.1f})' for r, i in zip(improved_risks, impacts)],
+        textposition='inside',
+        textfont=dict(color='#ffffff', size=11, weight=700),
+        hovertemplate='<b>%{y}</b><br>Potential Risk: %{x:.1f}%<br>Reduction: %{customdata:.1f}%<extra></extra>',
+        customdata=impacts
     ))
 
     fig.update_layout(
         title=dict(
-            text="What-If Simulator",
-            font=dict(size=16, color='#f1f5f9', family='"Inter","Segoe UI",sans-serif', weight=700),
+            text="💡 What-If Simulator: Your Risk Reduction Potential",
+            font=dict(size=17, color='#f1f5f9', family='"Inter","Segoe UI",sans-serif', weight=700),
             x=0.5,
-            xanchor='center'
-        ),
-        yaxis=dict(
-            title=dict(
-                text="Risk Reduction (%)",
-                font=dict(color='#10b981', size=11)
-            ),
-            tickfont=dict(color='#cbd5e1', size=10),
-            gridcolor="rgba(100, 116, 255, 0.15)",
-            side='left'
-        ),
-        yaxis2=dict(
-            title=dict(
-                text="Risk Probability (%)",
-                font=dict(color='#00d9ff', size=11)
-            ),
-            tickfont=dict(color='#cbd5e1', size=10),
-            overlaying='y',
-            side='right',
-            showgrid=False
+            xanchor='center',
+            pad=dict(t=15, b=20)
         ),
         xaxis=dict(
-            tickangle=-20,
-            tickfont=dict(color='#cbd5e1', size=10, family='"Inter","Segoe UI",sans-serif'),
-            showgrid=False
+            title=dict(
+                text="Risk Probability (%)",
+                font=dict(color='#94a3b8', size=12),
+                standoff=20
+            ),
+            range=[0, 100],
+            gridcolor="rgba(100, 116, 255, 0.15)",
+            tickfont=dict(color='#cbd5e1', size=11),
+            showgrid=True
         ),
-        height=500,
-        hovermode='x unified',
+        yaxis=dict(
+            tickfont=dict(color='#cbd5e1', size=13, family='"Inter","Segoe UI",sans-serif'),
+            automargin=True
+        ),
+        height=580,
+        hovermode='y unified',
         showlegend=True,
+        barmode='overlay',
         legend=dict(
             orientation="h",
             yanchor="top",
@@ -399,12 +414,12 @@ def create_risk_simulator_chart(simulator_data: Dict) -> go.Figure:
             bgcolor='rgba(26, 35, 66, 0.85)',
             bordercolor='rgba(100, 116, 255, 0.3)',
             borderwidth=1.5,
-            font=dict(color='#cbd5e1', size=10)
+            font=dict(color='#cbd5e1', size=12)
         ),
         paper_bgcolor='rgba(10, 14, 26, 0.5)',
         plot_bgcolor='rgba(21, 29, 53, 0.5)',
         font=dict(color='#cbd5e1', family='"Inter","Segoe UI",sans-serif'),
-        margin=dict(l=55, r=55, t=60, b=100)
+        margin=dict(l=200, r=50, t=90, b=140)
     )
 
     return fig

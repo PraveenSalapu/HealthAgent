@@ -48,7 +48,7 @@ def render_model_selector(current_model: str) -> str:
     model_info = CHAT_MODEL_INFO[selected]
     st.sidebar.markdown(f"**{model_info['description']}**")
     
-    with st.sidebar.expander("ℹ️ Capabilities"):
+    with st.sidebar.expander("Capabilities"):
         for capability in model_info['capabilities']:
             st.markdown(f"• {capability}")
     

@@ -235,7 +235,7 @@ def main():
         st.markdown(get_progress_indicator_html(1), unsafe_allow_html=True)
 
         # ============ TABLEAU DASHBOARD: PRE-ANALYSIS INSIGHTS ============
-        st.markdown("## 📊 Diabetes Patterns & Insights")
+        st.markdown("## Diabetes Patterns & Insights")
         st.markdown("""
         <div class="info-box">
             <p>
@@ -290,12 +290,12 @@ def main():
 
         # Use an expander to make the dashboard collapsible
         with st.expander("🔍 View Interactive Diabetes Patterns Dashboard", expanded=True):
-            st.components.v1.html(tableau_html, height=800, scrolling=True)
+            st.components.v1.html(tableau_html, height=900, scrolling=False)
 
         st.markdown("---")
 
         # ============ STEP 1: ASSESSMENT FORM ============
-        st.markdown("## 📋 Health Risk Assessment")
+        st.markdown("## Health Risk Assessment")
         st.markdown("Complete the form below to assess your diabetes risk.")
 
         # Render prediction form
@@ -412,7 +412,7 @@ def main():
             col1, col2 = st.columns([1, 1])
             with col1:
                 fig_gauge = create_risk_gauge(st.session_state.prediction_prob)
-                st.plotly_chart(fig_gauge, key="risk_gauge")
+                st.plotly_chart(fig_gauge, use_container_width=True, key="risk_gauge")
 
             with col2:
                 st.markdown(f"### Risk Level: {risk_level}")
@@ -425,13 +425,13 @@ def main():
             feature_importance = st.session_state.predictor.get_feature_importance()
 
             # Feature Importance Chart (full width)
-            st.markdown("### 🎯 Understanding Your Risk Score")
+            st.markdown("### Understanding Your Risk Score")
             fig_importance = create_feature_importance_chart(
                 feature_importance,
                 st.session_state.user_data,
                 st.session_state.diabetic_averages
             )
-            st.plotly_chart(fig_importance, config={'displayModeBar': False}, key="importance_chart")
+            st.plotly_chart(fig_importance, use_container_width=True, config={'displayModeBar': False}, key="importance_chart")
 
             # Two charts side by side
             viz_col1, viz_col2 = st.columns(2, gap="large")
@@ -443,7 +443,7 @@ def main():
                     st.session_state.diabetic_averages,
                     feature_importance
                 )
-                st.plotly_chart(fig_comparison, config={'displayModeBar': False}, key="comparison_chart")
+                st.plotly_chart(fig_comparison, use_container_width=True, config={'displayModeBar': False}, key="comparison_chart")
 
             with viz_col2:
                 # Risk Simulator
@@ -453,7 +453,7 @@ def main():
                     feature_importance
                 )
                 fig_simulator = create_risk_simulator_chart(simulator_data)
-                st.plotly_chart(fig_simulator, config={'displayModeBar': False}, key="simulator_chart")
+                st.plotly_chart(fig_simulator, use_container_width=True, config={'displayModeBar': False}, key="simulator_chart")
 
             # Enhanced Actionable Insights
             st.markdown("### 💡 Personalized Action Plan")
@@ -491,10 +491,10 @@ def main():
             if not st.session_state.agent_manager:
                 st.error("⚠️ AI agents failed to initialize.")
             else:
-                st.markdown("## 🤖 Healthcare AI Agents")
+                st.markdown("## Healthcare AI Agents")
 
                 # Agent selector - IMPROVED with visual cards
-                st.markdown("### 🤖 Select Your AI Assistant")
+                st.markdown("### Select Your AI Assistant")
                 agent_options = st.session_state.agent_manager.get_available_agents()
 
                 # Create visual agent cards
@@ -652,7 +652,7 @@ Begin your assessment now."""
     st.markdown("---")
     st.markdown("""
     <div style="text-align: center; color: #94a3b8; font-size: 0.9em;">
-        <p>🤖 Multi-Agent AI System: Gemini Agent (Generic Insights) + Lightweight RAG Agent (Clinical Insights)</p>
+        <p>Multi-Agent AI System: Gemini Agent (Generic Insights) + Lightweight RAG Agent (Clinical Insights)</p>
         <p>⚠️ This tool is for educational purposes only. Always consult healthcare professionals for medical advice.</p>
     </div>
     """, unsafe_allow_html=True)
