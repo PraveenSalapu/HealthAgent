@@ -17,8 +17,8 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL_DIR = os.path.join(BASE_DIR, "model_output")
 
-MODEL_JSON_PATH = os.path.join(MODEL_DIR, "xgboost_model.json")
-PREPROCESSOR_PATH = os.path.join(MODEL_DIR, "preprocessor.pkl")
+MODEL_JSON_PATH = os.path.join(MODEL_DIR, "xgb_model.json")
+PREPROCESSOR_PATH = os.path.join(MODEL_DIR, "preprocessing_config.json")
 THRESHOLD_PATH = os.path.join(MODEL_DIR, "optimal_threshold.json")
 AVERAGES_PATH = os.path.join(MODEL_DIR, "diabetic_averages.json")
 
