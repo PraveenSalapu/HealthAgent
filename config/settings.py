@@ -285,7 +285,7 @@ RAG_USE_HYBRID_SEARCH = True  # Enable semantic + keyword (BM25) hybrid search
 RAG_HYBRID_ALPHA = 0.7  # Weight for semantic search (0=pure keyword, 1=pure semantic, 0.7=70% semantic)
 RAG_USE_RERANKING = True  # Enable cross-encoder re-ranking
 RAG_RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"  # Cross-encoder for re-ranking
-RAG_MIN_RELEVANCE_SCORE = 0.65  # Minimum similarity score threshold
+RAG_MIN_RELEVANCE_SCORE = 0.50  # Minimum similarity score threshold (lowered from 0.65 to reduce fallback rate)
 
 # Local paths (for document loading)
 CLINICAL_DOCS_PATH = "data/clinical_docs"
@@ -294,6 +294,7 @@ CLINICAL_DOCS_PATH = "data/clinical_docs"
 QDRANT_URL = get_qdrant_url()
 QDRANT_API_KEY = get_qdrant_api_key()
 QDRANT_COLLECTION_NAME = "clinical_docs"
+QDRANT_COLLECTION_NAME_LIGHTWEIGHT = "clinical_docs_lightweight"
 
 # Legacy ChromaDB path (for migration reference)
 CHROMA_PERSIST_DIR = "data/chroma_db"
@@ -304,6 +305,7 @@ CHROMA_PERSIST_DIR = "data/chroma_db"
 
 CHAT_MODEL_GEMINI = "gemini"
 CHAT_MODEL_RAG = "rag"
+CHAT_MODEL_LIGHTWEIGHT_RAG = "lightweight_rag"
 
 CHAT_MODEL_INFO = {
     CHAT_MODEL_GEMINI: {
@@ -318,14 +320,26 @@ CHAT_MODEL_INFO = {
         ]
     },
     CHAT_MODEL_RAG: {
-        "name": "RAG Agent",
+        "name": "RAG Agent (LangChain)",
         "icon": "📚",
-        "description": "Clinical insights from medical literature",
+        "description": "Clinical insights from medical literature (heavy dependencies)",
         "capabilities": [
             "Evidence-based clinical information",
             "Medical literature references",
             "Research-backed recommendations",
             "Source citations"
+        ]
+    },
+    CHAT_MODEL_LIGHTWEIGHT_RAG: {
+        "name": "Lightweight RAG Agent",
+        "icon": "⚡",
+        "description": "Clinical insights using API-based embeddings (cloud-friendly)",
+        "capabilities": [
+            "Evidence-based clinical information",
+            "Medical literature references",
+            "Research-backed recommendations",
+            "Source citations",
+            "Optimized for Streamlit Cloud"
         ]
     }
 }
