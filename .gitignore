@@ -1,0 +1,100 @@
+# ============================================================================
+# CLEAN .GITIGNORE FOR PRODUCTION DEPLOYMENT
+# ============================================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+.virtualenv/
+
+# IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.devcontainer/
+
+# Claude Code
+.claude/
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+.streamlit/secrets.toml
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Logs
+*.log
+logs/
+
+# OS specific
+Thumbs.db
+Desktop.ini
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# ============================================================================
+# PROJECT-SPECIFIC EXCLUSIONS
+# ============================================================================
+
+# Test/Debug scripts (NOT needed for deployment)
+test*.py
+verify*.py
+inspect*.py
+diagnose*.py
+index_documents.py
+
+# Redundant app versions (keeping app_modular.py only)
+app.py
+app2.py
+provider_search.py
+
+# Unused agent files (keeping only lightweight_rag_agent.py)
+agents/rag_agent.py
+agents/retrieval_components.py
+
+# Old documentation (deprecated - using README.md as single source)
+README_MODULAR.md
+
+# Duplicate requirements files (keeping requirements.txt only)
+requirements-lightweight.txt
+
+# Duplicate model files
+model_output/xgboost_model.json
+
+# Large data directories (RAG documents - optional, can be uploaded via admin page)
+data/
+documents/
+
+# Git files
+.git/
+.gitattributes

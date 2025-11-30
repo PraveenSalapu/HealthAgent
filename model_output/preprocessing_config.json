@@ -1,0 +1,75 @@
+{
+  "numerical_features": [
+    "GenHlth",
+    "HighBP",
+    "HighChol",
+    "Age",
+    "BMI",
+    "DiffWalk",
+    "Income",
+    "PhysHlth",
+    "HeartDiseaseorAttack",
+    "Education",
+    "PhysActivity"
+  ],
+  "categorical_features": [],
+  "scaler_params": {
+    "GenHlth": {
+      "mean": 2.836824013647143,
+      "std": 1.115240487304324
+    },
+    "HighBP": {
+      "mean": 0.5695377203538629,
+      "std": 0.476427790599444
+    },
+    "HighChol": {
+      "mean": 0.5340642124229109,
+      "std": 0.4759098123600621
+    },
+    "Age": {
+      "mean": 8.486639004327946,
+      "std": 2.8713324961868065
+    },
+    "BMI": {
+      "mean": 29.885620841790097,
+      "std": 7.249287711245347
+    },
+    "DiffWalk": {
+      "mean": 0.25532920773629236,
+      "std": 0.41398509307808123
+    },
+    "Income": {
+      "mean": 5.701787465572206,
+      "std": 2.158265706672249
+    },
+    "PhysHlth": {
+      "mean": 5.906027196665461,
+      "std": 10.15130348684569
+    },
+    "HeartDiseaseorAttack": {
+      "mean": 0.145656754830242,
+      "std": 0.3258949180283544
+    },
+    "Education": {
+      "mean": 4.931588084139636,
+      "std": 0.9881386696707873
+    },
+    "PhysActivity": {
+      "mean": 0.7099096468641167,
+      "std": 0.4266799275741161
+    }
+  },
+  "feature_order": [
+    "GenHlth",
+    "HighBP",
+    "HighChol",
+    "Age",
+    "BMI",
+    "DiffWalk",
+    "Income",
+    "PhysHlth",
+    "HeartDiseaseorAttack",
+    "Education",
+    "PhysActivity"
+  ]
+}
