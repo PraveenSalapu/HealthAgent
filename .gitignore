@@ -1,3 +1,7 @@
+# ============================================================================
+# CLEAN .GITIGNORE FOR PRODUCTION DEPLOYMENT
+# ============================================================================
+
 # Python
 __pycache__/
 *.py[cod]
@@ -24,29 +28,20 @@ env/
 *.swo
 *~
 .DS_Store
+.devcontainer/
 
 # Claude Code
-.claude/settings.local.json
+.claude/
 
-# Environment Variables
+# Environment Variables & Secrets
 .env
 .env.local
 .env.*.local
+.streamlit/secrets.toml
 
 # Jupyter Notebook
 .ipynb_checkpoints/
 *.ipynb_checkpoints
-
-# Model files (large files - consider using Git LFS)
-# Uncomment if you don't want to track model files:
-# *.pkl
-# *.joblib
-# *.h5
-# *.pt
-# *.pth
-
-# Streamlit
-.streamlit/secrets.toml
 
 # Logs
 *.log
@@ -67,36 +62,39 @@ htmlcov/
 .dmypy.json
 dmypy.json
 
-# ====================================
-# Project-specific exclusions
-# ====================================
+# ============================================================================
+# PROJECT-SPECIFIC EXCLUSIONS
+# ============================================================================
 
-# Redundant/Alternative app versions (keeping app_modular.py only)
+# Test/Debug scripts (NOT needed for deployment)
+test*.py
+verify*.py
+inspect*.py
+diagnose*.py
+index_documents.py
+
+# Redundant app versions (keeping app_modular.py only)
 app.py
 app2.py
 provider_search.py
 
-# Test files
-test.py
-test2.py
-test.txt
-diagnose_model.py
-test_improved_rag.py
-test_phase2_rag.py
-verify_rag.py
-reindex_documents.py
+# Unused agent files (keeping only lightweight_rag_agent.py)
+agents/rag_agent.py
+agents/retrieval_components.py
 
 # Old documentation (deprecated - using README.md as single source)
 README_MODULAR.md
 
-# Old/duplicate model outputs (using model_output2/ only)
-model_output/
-preprocessing_pipeline.pkl
-average_diabetic_features.json
+# Duplicate requirements files (keeping requirements.txt only)
+requirements-lightweight.txt
 
-# Unused model metadata files
-model_output2/evaluation_metrics.json
-model_output2/feature_config.json
+# Duplicate model files
+model_output/xgboost_model.json
 
-# Data files (clinical documents - too large for git)
+# Large data directories (RAG documents - optional, can be uploaded via admin page)
 data/
+documents/
+
+# Git files
+.git/
+.gitattributes

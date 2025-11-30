@@ -11,8 +11,10 @@ This module manages:
 from typing import Dict, List, Optional
 from .base_agent import BaseAgent
 from .gemini_agent import GeminiAgent
-from .rag_agent import RAGAgent
-from config.settings import CHAT_MODEL_GEMINI, CHAT_MODEL_RAG
+from .lightweight_rag_agent import LightweightRAGAgent
+# REMOVED: Heavy RAG agent (LangChain-based)
+# from .rag_agent import RAGAgent
+from config.settings import CHAT_MODEL_GEMINI, CHAT_MODEL_LIGHTWEIGHT_RAG  # CHAT_MODEL_RAG removed
 from utils.helpers import build_profile_summary, classify_risk
 
 
@@ -23,9 +25,12 @@ class AgentManager:
         """Initialize agent manager."""
         self.agents: Dict[str, BaseAgent] = {}
         self.active_agent_type: str = CHAT_MODEL_GEMINI
+        # Conversation histories for Gemini and Lightweight RAG agents
         self.conversation_histories: Dict[str, List[Dict[str, str]]] = {
             CHAT_MODEL_GEMINI: [],
-            CHAT_MODEL_RAG: []
+            CHAT_MODEL_LIGHTWEIGHT_RAG: []
+            # REMOVED: Heavy RAG agent (LangChain-based)
+            # CHAT_MODEL_RAG: [],
         }
         self.prediction_context: Dict = {}
         self._initialize_agents()
@@ -39,16 +44,26 @@ class AgentManager:
             print(f"[OK] {gemini_agent.name} initialized")
         else:
             print(f"[WARNING] {gemini_agent.name} initialization failed")
-            self.agents[CHAT_MODEL_GEMINI] = gemini_agent  # Add anyway for fallback
+            self.agents[CHAT_MODEL_GEMINI] = gemini_agent
 
-        # Initialize RAG agent
-        rag_agent = RAGAgent()
-        if rag_agent.initialize():
-            self.agents[CHAT_MODEL_RAG] = rag_agent
-            print(f"[OK] {rag_agent.name} initialized")
+        # Initialize Lightweight RAG agent (API-based embeddings)
+        lightweight_rag_agent = LightweightRAGAgent()
+        if lightweight_rag_agent.initialize():
+            self.agents[CHAT_MODEL_LIGHTWEIGHT_RAG] = lightweight_rag_agent
+            print(f"[OK] {lightweight_rag_agent.name} initialized")
         else:
-            print(f"[WARNING] {rag_agent.name} initialization failed")
-            self.agents[CHAT_MODEL_RAG] = rag_agent  # Add anyway for fallback
+            print(f"[WARNING] {lightweight_rag_agent.name} initialization failed")
+            self.agents[CHAT_MODEL_LIGHTWEIGHT_RAG] = lightweight_rag_agent
+
+        # REMOVED: Heavy RAG agent (LangChain-based) - not needed
+        # # Initialize RAG agent (LangChain-based)
+        # rag_agent = RAGAgent()
+        # if rag_agent.initialize():
+        #     self.agents[CHAT_MODEL_RAG] = rag_agent
+        #     print(f"[OK] {rag_agent.name} initialized")
+        # else:
+        #     print(f"[WARNING] {rag_agent.name} initialization failed")
+        #     self.agents[CHAT_MODEL_RAG] = rag_agent
     
     def set_prediction_context(self, probability: float, user_data: Dict[str, float]):
         """

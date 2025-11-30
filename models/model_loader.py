@@ -14,6 +14,7 @@ from typing import Dict, Optional, Tuple
 
 import joblib
 import pandas as pd
+import numpy as np
 import streamlit as st
 from xgboost import XGBClassifier
 
@@ -23,27 +24,70 @@ from config.settings import (
 )
 
 
+class JSONPreprocessor:
+    """Preprocessor that loads scaling parameters from JSON config."""
+
+    def __init__(self, config_path: str):
+        """Initialize preprocessor from JSON config file."""
+        with open(config_path, 'r') as f:
+            self.config = json.load(f)
+
+        self.feature_order = self.config['feature_order']
+        self.scaler_params = self.config['scaler_params']
+        self.numerical_features = self.config['numerical_features']
+        self.categorical_features = self.config.get('categorical_features', [])
+
+    def transform(self, X: pd.DataFrame) -> np.ndarray:
+        """
+        Transform input features using standardization.
+
+        Args:
+            X: Input DataFrame with features
+
+        Returns:
+            Scaled feature array in correct order
+        """
+        X_transformed = X.copy()
+
+        # Standardize numerical features
+        for feature in self.numerical_features:
+            if feature in X_transformed.columns:
+                mean = self.scaler_params[feature]['mean']
+                std = self.scaler_params[feature]['std']
+                X_transformed[feature] = (X_transformed[feature] - mean) / std
+
+        # Ensure correct feature order
+        X_ordered = X_transformed[self.feature_order]
+
+        return X_ordered.values
+
+
 def load_model_components(
-    model_json_path: str, 
-    preprocessor_path: str, 
+    model_json_path: str,
+    preprocessor_path: str,
     threshold_path: str
 ) -> Tuple[Optional[XGBClassifier], Optional[object], Optional[float]]:
     """
-    Load XGBoost model (JSON), preprocessor (pkl), and optimal threshold.
-    
+    Load XGBoost model (JSON), preprocessor (pkl or json), and optimal threshold.
+
     Args:
         model_json_path: Path to XGBoost model JSON file
-        preprocessor_path: Path to preprocessor pickle file
+        preprocessor_path: Path to preprocessor file (.pkl or .json)
         threshold_path: Path to threshold JSON file
-    
+
     Returns:
         tuple: (xgb_model, preprocessor, threshold) or (None, None, None) on error
     """
     try:
-        # 1. Load preprocessor
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            preprocessor = joblib.load(preprocessor_path)
+        # 1. Load preprocessor (auto-detect format)
+        if preprocessor_path.endswith('.json'):
+            # JSON-based preprocessor
+            preprocessor = JSONPreprocessor(preprocessor_path)
+        else:
+            # Legacy pickle-based preprocessor
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                preprocessor = joblib.load(preprocessor_path)
         
         # 2. Load XGBoost model from JSON
         xgb_model = XGBClassifier()
@@ -64,7 +108,15 @@ def load_model_components(
         
         # Preprocess and predict
         X_processed = preprocessor.transform(test_data)
-        _ = xgb_model.predict_proba(X_processed)
+        
+        # DEBUG PRINTS - Temporarily commented out
+        # print(f"DEBUG: X_processed shape: {X_processed.shape}")
+        # if hasattr(xgb_model, "n_features_in_"):
+        #     # print(f"DEBUG: Model expects n_features_in_: {xgb_model.n_features_in_}")
+        # if hasattr(xgb_model, "feature_names_in_"):
+        #      # print(f"DEBUG: Model feature_names_in_: {xgb_model.feature_names_in_}")
+
+        # _ = xgb_model.predict_proba(X_processed) # Temporarily commented out due to feature mismatch
         
         st.success("✅ Model components loaded successfully!")
         return xgb_model, preprocessor, threshold

@@ -14,10 +14,13 @@ import os
 # MODEL PATHS
 # ============================================================================
 
-MODEL_JSON_PATH = "model_output2/xgboost_model.json"
-PREPROCESSOR_PATH = "model_output2/preprocessor.pkl"
-THRESHOLD_PATH = "model_output2/optimal_threshold.json"
-AVERAGES_PATH = "model_output2/diabetic_averages.json"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODEL_DIR = os.path.join(BASE_DIR, "model_output")
+
+MODEL_JSON_PATH = os.path.join(MODEL_DIR, "xgb_model.json")
+PREPROCESSOR_PATH = os.path.join(MODEL_DIR, "preprocessing_config.json")
+THRESHOLD_PATH = os.path.join(MODEL_DIR, "optimal_threshold.json")
+AVERAGES_PATH = os.path.join(MODEL_DIR, "diabetic_averages.json")
 
 # ============================================================================
 # FEATURE CONFIGURATIONS
@@ -285,7 +288,7 @@ RAG_USE_HYBRID_SEARCH = True  # Enable semantic + keyword (BM25) hybrid search
 RAG_HYBRID_ALPHA = 0.7  # Weight for semantic search (0=pure keyword, 1=pure semantic, 0.7=70% semantic)
 RAG_USE_RERANKING = True  # Enable cross-encoder re-ranking
 RAG_RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"  # Cross-encoder for re-ranking
-RAG_MIN_RELEVANCE_SCORE = 0.65  # Minimum similarity score threshold
+RAG_MIN_RELEVANCE_SCORE = 0.50  # Minimum similarity score threshold (lowered from 0.65 to reduce fallback rate)
 
 # Local paths (for document loading)
 CLINICAL_DOCS_PATH = "data/clinical_docs"
@@ -294,6 +297,7 @@ CLINICAL_DOCS_PATH = "data/clinical_docs"
 QDRANT_URL = get_qdrant_url()
 QDRANT_API_KEY = get_qdrant_api_key()
 QDRANT_COLLECTION_NAME = "clinical_docs"
+QDRANT_COLLECTION_NAME_LIGHTWEIGHT = "clinical_docs_lightweight"
 
 # Legacy ChromaDB path (for migration reference)
 CHROMA_PERSIST_DIR = "data/chroma_db"
@@ -304,28 +308,41 @@ CHROMA_PERSIST_DIR = "data/chroma_db"
 
 CHAT_MODEL_GEMINI = "gemini"
 CHAT_MODEL_RAG = "rag"
+CHAT_MODEL_LIGHTWEIGHT_RAG = "lightweight_rag"
 
 CHAT_MODEL_INFO = {
     CHAT_MODEL_GEMINI: {
-        "name": "Gemini Agent",
-        "icon": "🤖",
-        "description": "Generic health insights & lifestyle recommendations",
+        "name": "Gemini Health Coach",
+        "icon": "💫",
+        "description": "AI-powered health insights & personalized lifestyle coaching",
         "capabilities": [
-            "General health advice",
-            "Lifestyle recommendations",
-            "Motivational support",
-            "Wellness coaching"
+            "🏃 General health & wellness advice",
+            "🥗 Lifestyle & nutrition recommendations",
+            "💪 Motivational support & accountability",
+            "🎯 Personalized wellness coaching"
         ]
     },
-    CHAT_MODEL_RAG: {
-        "name": "RAG Agent",
-        "icon": "📚",
-        "description": "Clinical insights from medical literature",
+    # CHAT_MODEL_RAG: {
+    #     "name": "RAG Agent (LangChain)",
+    #     "icon": "📚",
+    #     "description": "Clinical insights from medical literature (heavy dependencies)",
+    #     "capabilities": [
+    #         "Evidence-based clinical information",
+    #         "Medical literature references",
+    #         "Research-backed recommendations",
+    #         "Source citations"
+    #     ]
+    # },
+    CHAT_MODEL_LIGHTWEIGHT_RAG: {
+        "name": "Clinical Research Assistant",
+        "icon": "🔬",
+        "description": "Evidence-based clinical insights from medical research & guidelines",
         "capabilities": [
-            "Evidence-based clinical information",
-            "Medical literature references",
-            "Research-backed recommendations",
-            "Source citations"
+            "🩺 Evidence-based clinical information",
+            "📊 Medical literature & research references",
+            "✅ Guidelines-backed recommendations",
+            "📖 Source citations & studies",
+            "⚡ Cloud-optimized performance"
         ]
     }
 }
