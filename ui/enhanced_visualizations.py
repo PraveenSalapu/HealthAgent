@@ -150,6 +150,7 @@ def create_top_factors_comparison(user_data: Dict[str, float],
                                   feature_importance: Dict[str, float]) -> go.Figure:
     """
     Create simplified comparison chart showing only top 6 most impactful factors.
+    Enhanced with contextual labels showing actual values with units.
     """
     # Get contributions
     contributions = get_feature_contributions(user_data, avg_data, feature_importance)
@@ -160,6 +161,26 @@ def create_top_factors_comparison(user_data: Dict[str, float],
     features = [FEATURE_NAMES[f] for f in top_features]
     user_values = [user_data[f] for f in top_features]
     avg_values = [avg_data.get(f, 0) for f in top_features]
+
+    # Create contextual labels based on feature type
+    def format_value_label(feature_key, value):
+        """Format value with appropriate context and units."""
+        if feature_key == 'BMI':
+            return f'{value:.1f}'
+        elif feature_key in ['Age', 'Education', 'Income']:
+            return f'{int(value)}'
+        elif feature_key in ['PhysHlth', 'MentHlth']:
+            return f'{int(value)} days'
+        elif feature_key in ['HighBP', 'HighChol', 'PhysActivity', 'DiffWalk', 'HeartDiseaseorAttack']:
+            return 'Yes' if value == 1 else 'No'
+        elif feature_key == 'GenHlth':
+            health_map = {1: 'Excellent', 2: 'Very Good', 3: 'Good', 4: 'Fair', 5: 'Poor'}
+            return health_map.get(int(value), f'{int(value)}')
+        else:
+            return f'{value:.1f}'
+
+    user_labels = [format_value_label(f, v) for f, v in zip(top_features, user_values)]
+    avg_labels = [format_value_label(f, v) for f, v in zip(top_features, avg_values)]
 
     fig = go.Figure()
 
@@ -172,9 +193,11 @@ def create_top_factors_comparison(user_data: Dict[str, float],
             color='#00d9ff',
             line=dict(color='#00b8d4', width=1.5)
         ),
-        text=[f'{v:.1f}' for v in user_values],
+        text=user_labels,
         textposition='outside',
-        textfont=dict(color='#f1f5f9', size=13, family='"Inter","Segoe UI",sans-serif', weight=600)
+        textfont=dict(color='#f1f5f9', size=13, family='"Inter","Segoe UI",sans-serif', weight=600),
+        customdata=[[f, uv, ul] for f, uv, ul in zip(top_features, user_values, user_labels)],
+        hovertemplate='<b>%{x}</b><br>Your Value: %{customdata[2]}<extra></extra>'
     ))
 
     # Average diabetic values
@@ -186,50 +209,52 @@ def create_top_factors_comparison(user_data: Dict[str, float],
             color='#7c3aed',
             line=dict(color='#6d28d9', width=1.5)
         ),
-        text=[f'{v:.1f}' for v in avg_values],
+        text=avg_labels,
         textposition='outside',
-        textfont=dict(color='#cbd5e1', size=13, family='"Inter","Segoe UI",sans-serif', weight=500)
+        textfont=dict(color='#cbd5e1', size=13, family='"Inter","Segoe UI",sans-serif', weight=500),
+        customdata=[[f, av, al] for f, av, al in zip(top_features, avg_values, avg_labels)],
+        hovertemplate='<b>%{x}</b><br>Diabetic Avg: %{customdata[2]}<extra></extra>'
     ))
 
     fig.update_layout(
         title=dict(
-            text='Your Top Risk Factors vs. Average',
-            font=dict(size=17, color='#f1f5f9', family='"Inter","Segoe UI",sans-serif', weight=700),
+            text='📊 Your Top Risk Factors vs. Diabetic Average',
+            font=dict(size=18, color='#f1f5f9', family='"Inter","Segoe UI",sans-serif', weight=700),
             x=0.5,
             xanchor='center',
             pad=dict(t=15, b=20)
         ),
         xaxis_title=dict(
             text='Key Health Factors',
-            font=dict(size=12, color='#94a3b8'),
+            font=dict(size=13, color='#94a3b8'),
             standoff=20
         ),
         yaxis_title=dict(
             text='Value',
-            font=dict(size=12, color='#94a3b8'),
+            font=dict(size=13, color='#94a3b8'),
             standoff=15
         ),
         barmode='group',
-        height=580,
+        height=500,
         hovermode='x unified',
         showlegend=True,
         legend=dict(
             orientation="h",
             yanchor="top",
-            y=-0.22,
+            y=-0.18,
             xanchor="center",
             x=0.5,
             bgcolor='rgba(26, 35, 66, 0.85)',
             bordercolor='rgba(100, 116, 255, 0.3)',
             borderwidth=1.5,
-            font=dict(color='#cbd5e1', size=12)
+            font=dict(color='#cbd5e1', size=13)
         ),
         paper_bgcolor='rgba(10, 14, 26, 0.5)',
         plot_bgcolor='rgba(21, 29, 53, 0.5)',
         font=dict(color='#cbd5e1', family='"Inter","Segoe UI",sans-serif'),
-        margin=dict(l=80, r=60, t=90, b=150),
-        bargap=0.25,
-        bargroupgap=0.12
+        margin=dict(l=100, r=100, t=100, b=120),
+        bargap=0.3,
+        bargroupgap=0.15
     )
 
     fig.update_xaxes(

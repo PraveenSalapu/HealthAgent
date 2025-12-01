@@ -433,27 +433,24 @@ def main():
             )
             st.plotly_chart(fig_importance, use_container_width=True, config={'displayModeBar': False}, key="importance_chart")
 
-            # Two charts side by side
-            viz_col1, viz_col2 = st.columns(2, gap="large")
+            # Top Factors Comparison - Full Width
+            fig_comparison = create_top_factors_comparison(
+                st.session_state.user_data,
+                st.session_state.diabetic_averages,
+                feature_importance
+            )
+            st.plotly_chart(fig_comparison, use_container_width=True, config={'displayModeBar': False}, key="comparison_chart")
 
-            with viz_col1:
-                # Top Factors Comparison
-                fig_comparison = create_top_factors_comparison(
-                    st.session_state.user_data,
-                    st.session_state.diabetic_averages,
-                    feature_importance
-                )
-                st.plotly_chart(fig_comparison, use_container_width=True, config={'displayModeBar': False}, key="comparison_chart")
-
-            with viz_col2:
-                # Risk Simulator
-                simulator_data = create_risk_simulator_data(
-                    st.session_state.user_data,
-                    st.session_state.predictor,
-                    feature_importance
-                )
-                fig_simulator = create_risk_simulator_chart(simulator_data)
-                st.plotly_chart(fig_simulator, use_container_width=True, config={'displayModeBar': False}, key="simulator_chart")
+            # # What-If Simulator (Commented Out)
+            # viz_col1, viz_col2 = st.columns(2, gap="large")
+            # with viz_col2:
+            #     simulator_data = create_risk_simulator_data(
+            #         st.session_state.user_data,
+            #         st.session_state.predictor,
+            #         feature_importance
+            #     )
+            #     fig_simulator = create_risk_simulator_chart(simulator_data)
+            #     st.plotly_chart(fig_simulator, use_container_width=True, config={'displayModeBar': False}, key="simulator_chart")
 
             # Enhanced Actionable Insights
             st.markdown("### 💡 Personalized Action Plan")
