@@ -123,7 +123,7 @@ def main():
 
     # Theme toggle in sidebar
     st.sidebar.markdown("---")
-    st.sidebar.markdown("### 🎨 Theme")
+    st.sidebar.markdown("### Theme")
     theme_col1, theme_col2 = st.sidebar.columns(2)
     with theme_col1:
         if st.button("☀️ Light", key="light_theme", use_container_width=True, type="primary" if st.session_state.theme == "light" else "secondary"):
@@ -171,7 +171,7 @@ def main():
 
     # Check if models loaded
     if st.session_state.predictor is None:
-        st.error("⚠️ Models failed to load. Please check model files.")
+        st.error(" Models failed to load. Please check model files.")
         return
 
     # Hero Header
@@ -239,7 +239,7 @@ def main():
         st.markdown("""
         <div class="info-box">
             <p>
-                📈 <strong>Explore population-level diabetes patterns</strong> before taking your personal assessment.
+                <strong>Explore population-level diabetes patterns</strong> before taking your personal assessment.
                 This interactive dashboard shows key trends and risk factors from our training data.
             </p>
         </div>
@@ -289,7 +289,7 @@ def main():
         """
 
         # Use an expander to make the dashboard collapsible
-        with st.expander("🔍 View Interactive Diabetes Patterns Dashboard", expanded=True):
+        with st.expander("View Interactive Diabetes Patterns Dashboard", expanded=True):
             st.components.v1.html(tableau_html, height=900, scrolling=False)
 
         st.markdown("---")
@@ -318,7 +318,7 @@ def main():
                 # Reset chatbot initialization to trigger auto-welcome for all agents
                 st.session_state.chatbot_initialized = {}
 
-                st.success("✅ Assessment complete! Scroll down to see your results and chat with AI agents.")
+                st.success("✅ Assessment complete! Scroll up to see your results and chat with AI agents.")
                 st.rerun()
     else:
         # Progress Indicator - Step 3: Complete (Analysis & AI Guidance)
@@ -453,7 +453,7 @@ def main():
             #     st.plotly_chart(fig_simulator, use_container_width=True, config={'displayModeBar': False}, key="simulator_chart")
 
             # Enhanced Actionable Insights
-            st.markdown("### 💡 Personalized Action Plan")
+            st.markdown("### Personalized Action Plan!")
             st.markdown("""
             <div class="info-box">
                 <p>
@@ -590,7 +590,7 @@ Begin your assessment now."""
 
                             # Only show spinner for the currently selected agent
                             if agent_key == selected_agent:
-                                with st.spinner(f"🤖 {CHAT_MODEL_INFO[agent_key]['icon']} Preparing personalized insights..."):
+                                with st.spinner(f" {CHAT_MODEL_INFO[agent_key]['icon']} Preparing personalized insights..."):
                                     welcome_response = st.session_state.agent_manager.send_message(intro_message, agent_type=agent_key)
                             else:
                                 # Initialize other agents silently in the background
