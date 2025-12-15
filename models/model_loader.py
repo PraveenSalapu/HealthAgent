@@ -91,6 +91,9 @@ def load_model_components(
         
         # 2. Load XGBoost model from JSON
         xgb_model = XGBClassifier()
+        # Ensure _estimator_type is set before loading (required by scikit-learn interface)
+        if not hasattr(xgb_model, '_estimator_type'):
+            xgb_model._estimator_type = "classifier"
         xgb_model.load_model(model_json_path)
         
         # 3. Load optimal threshold
