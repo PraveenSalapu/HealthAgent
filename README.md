@@ -311,6 +311,7 @@ HealthAgentDiabetic/
 |----------|---------|
 | **[SETUP.md](SETUP.md)** | Complete setup guide with troubleshooting |
 | **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** | Deploy to Streamlit Cloud |
+| **[GITHUB_COPILOT_API_GUIDE.md](GITHUB_COPILOT_API_GUIDE.md)** | How to get and use GitHub Copilot API |
 | **[IMPROVED_RAG_DESIGN.md](IMPROVED_RAG_DESIGN.md)** | RAG architecture details (technical) |
 | **[PHASE1_RESULTS.md](PHASE1_RESULTS.md)** | Phase 1 implementation results |
 | **[PHASE2_RESULTS.md](PHASE2_RESULTS.md)** | Phase 2 testing and benchmarks |
