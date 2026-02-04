@@ -118,6 +118,7 @@ curl -H "Authorization: Bearer ghp_xxxxxxxxxxxx" \
 ### GitHub App Authentication
 
 ```python
+import time
 import requests
 from jwt import encode
 
