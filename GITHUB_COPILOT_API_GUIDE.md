@@ -2,6 +2,8 @@
 
 This guide explains how to get access to and use the GitHub Copilot API.
 
+> **⚠️ Important Note:** Direct programmatic access to GitHub Copilot's code completion API may be limited or restricted. This guide covers available GitHub APIs related to Copilot subscription management and general AI model access through GitHub Models. Always refer to [GitHub's official documentation](https://docs.github.com/en/copilot) for the most current API capabilities and access methods.
+
 ## Table of Contents
 
 - [What is GitHub Copilot API?](#what-is-github-copilot-api)
@@ -18,13 +20,22 @@ This guide explains how to get access to and use the GitHub Copilot API.
 
 ## What is GitHub Copilot API?
 
-GitHub Copilot is an AI-powered code completion tool that uses OpenAI's Codex model. The GitHub Copilot API allows developers to integrate Copilot's capabilities into their applications, tools, and workflows.
+GitHub Copilot is an AI-powered code completion tool that uses OpenAI's Codex model. While GitHub Copilot is primarily used through IDE extensions, GitHub provides APIs for:
+
+1. **Subscription Management**: Check Copilot access and manage seats
+2. **GitHub Models**: Access to AI models through GitHub's marketplace
+3. **Integration Points**: Webhook and app integration capabilities
 
 **Key Features:**
-- Code completion and suggestions
+- Code completion and suggestions (primarily through IDE extensions)
 - Code generation from natural language descriptions
 - Context-aware programming assistance
 - Support for multiple programming languages
+
+**API Availability:**
+- ✅ Copilot subscription and seat management APIs are available
+- ✅ GitHub Models provides access to various AI models
+- ⚠️ Direct code completion API access may be limited to IDE extensions
 
 ---
 
@@ -167,18 +178,28 @@ import requests
 import json
 
 def get_code_completion(prompt, token):
-    """Get code completion from GitHub Copilot via GitHub Models"""
+    """
+    Get code completion from GitHub Copilot via GitHub Models
     
-    url = "https://models.github.com/v1/completions"  # Example endpoint
+    NOTE: This is a conceptual example. The actual endpoint URL and
+    request format should be obtained from GitHub's official documentation
+    as the API is continuously evolving.
+    
+    See: https://github.com/marketplace/models for current endpoints
+    """
+    
+    # PLACEHOLDER: Replace with actual endpoint from GitHub documentation
+    url = "https://api.github.com/models/completions"  # Verify current endpoint
     
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json",
-        "Accept": "application/json"
+        "Accept": "application/json",
+        "X-GitHub-Api-Version": "2022-11-28"
     }
     
     data = {
-        "model": "copilot",
+        "model": "copilot",  # Verify available model names
         "prompt": prompt,
         "max_tokens": 100,
         "temperature": 0.5
@@ -229,27 +250,33 @@ class GitHubCopilotClient:
         return response.json()
     
     def get_completion(self, code_context, language="python"):
-        """Get code completion suggestion"""
-        # Note: Actual completion endpoint may vary
-        # This is a simplified example
+        """
+        Get code completion suggestion
         
-        # For real usage, you would integrate with the GitHub Models API
-        # or use the Copilot extension's protocol
+        NOTE: This is a placeholder method. The actual GitHub Copilot API
+        for code completions may not be publicly available or may require
+        different authentication/endpoints.
         
-        payload = {
-            "context": code_context,
-            "language": language
-        }
+        For production use:
+        1. Check GitHub's official documentation for available endpoints
+        2. Consider using GitHub Copilot through its official IDE extensions
+        3. Explore GitHub Models marketplace for available AI models
         
-        # Implementation depends on actual API availability
-        # Check GitHub documentation for latest endpoints
-        pass
+        Returns:
+            NotImplementedError: This method requires implementation based on
+                                current GitHub API documentation
+        """
+        raise NotImplementedError(
+            "Code completion endpoint not yet available. "
+            "Please check GitHub documentation for current API capabilities: "
+            "https://docs.github.com/en/copilot"
+        )
 
-# Usage
+# Usage example (check_access only)
 token = os.environ.get("GITHUB_TOKEN")
 client = GitHubCopilotClient(token)
 
-# Check access
+# Check if you have Copilot access
 access_info = client.check_access()
 print(f"Copilot access: {access_info}")
 ```
