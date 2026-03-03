@@ -288,7 +288,7 @@ RAG_USE_HYBRID_SEARCH = True  # Enable semantic + keyword (BM25) hybrid search
 RAG_HYBRID_ALPHA = 0.7  # Weight for semantic search (0=pure keyword, 1=pure semantic, 0.7=70% semantic)
 RAG_USE_RERANKING = True  # Enable cross-encoder re-ranking
 RAG_RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"  # Cross-encoder for re-ranking
-RAG_MIN_RELEVANCE_SCORE = 0.50  # Minimum similarity score threshold (lowered from 0.65 to reduce fallback rate)
+RAG_MIN_RELEVANCE_SCORE = 0.10  # Minimum similarity score threshold (lowered from 0.65 to reduce fallback rate)
 
 # Local paths (for document loading)
 CLINICAL_DOCS_PATH = "data/clinical_docs"
