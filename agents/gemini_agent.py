@@ -2,7 +2,6 @@
 Gemini Agent for generic health insights.
 Uses the new Google GenAI SDK (google-genai) for personalized health coaching.
 """
-
 from typing import Dict, List, Optional
 from .base_agent import BaseAgent
 from config.settings import GEMINI_API_KEY, GEMINI_MODEL, CHAT_MODEL_INFO, CHAT_MODEL_GEMINI
@@ -14,7 +13,7 @@ class GeminiAgent(BaseAgent):
     def __init__(self):
         info = CHAT_MODEL_INFO[CHAT_MODEL_GEMINI]
         super().__init__(name=info["name"], description=info["description"])
-        
+
         self.client = None
         self.api_key = self._get_api_key()
         self.model_name = GEMINI_MODEL
@@ -35,12 +34,12 @@ class GeminiAgent(BaseAgent):
         """Initialize Gemini API using the new SDK."""
         try:
             from google import genai
-            
+
             api_key = kwargs.get("api_key", self.api_key)
             if not api_key:
                 print("[ERROR] Gemini API key missing.")
                 return False
-                
+
             self.client = genai.Client(api_key=api_key)
             self.is_initialized = True
             return True
@@ -53,17 +52,12 @@ class GeminiAgent(BaseAgent):
         """Generate response using the new SDK."""
         if not self.is_initialized:
             return self._generate_fallback_response(message, context)
-
         try:
             prompt = self._build_system_prompt(context)
-            
-            # Note: The new SDK handles history via the contents parameter or chat sessions.
-            # For simplicity and context management, we include instruction in the system_prompt.
-            
+            full_contents = prompt + "\nUser Question: " + message
             response = self.client.models.generate_content(
                 model=self.model_name,
-                contents=f"{prompt}
-User Question: {message}"
+                contents=full_contents
             )
             return response.text
         except Exception as e:
@@ -74,17 +68,19 @@ User Question: {message}"
         prob = context.get("probability", 0)
         risk = context.get("risk_level", "Unknown")
         summary = context.get("profile_summary", "No data")
-        
-        return f"""You are a compassionate health coach.
-CONTEXT: Risk Level {risk} ({prob:.1f}%), Metrics: {summary}
-YOUR ROLE: Provide empathetic, positive guidance on lifestyle and habits.
-SAFETY: Always clarify this is NOT a medical diagnosis. Include disclaimers.
-"""
+        prob_str = "{:.1f}".format(prob)
+        return (
+            "You are a compassionate health coach.\n"
+            "CONTEXT: Risk Level " + risk + " (" + prob_str + "%), Metrics: " + summary + "\n"
+            "YOUR ROLE: Provide empathetic, positive guidance on lifestyle and habits.\n"
+            "SAFETY: Always clarify this is NOT a medical diagnosis. Include disclaimers."
+        )
 
     def _generate_fallback_response(self, message: str, context: Dict) -> str:
         prob = context.get("probability", 0)
         risk = context.get("risk_level", "Unknown")
-        return f"Assessment: Risk probability {prob:.1f}% ({risk}). Please consult a doctor for a formal diagnosis."
+        prob_str = "{:.1f}".format(prob)
+        return "Assessment: Risk probability " + prob_str + "% (" + risk + "). Please consult a doctor for a formal diagnosis."
 
     def get_capabilities(self) -> List[str]:
         return self.capabilities
