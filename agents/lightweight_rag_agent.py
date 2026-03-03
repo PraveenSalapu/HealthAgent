@@ -2,7 +2,6 @@
 Lightweight RAG Agent using API-based embeddings.
 Uses the new Google GenAI SDK (google-genai) and gemini-embedding-001.
 """
-
 import time
 from typing import Dict, List, Optional
 from pathlib import Path
@@ -24,7 +23,6 @@ from config.settings import (
     RAG_USE_HYBRID_SEARCH,
     RAG_HYBRID_ALPHA
 )
-
 from utils.lightweight_rag import (
     Document,
     GeminiEmbeddings,
@@ -43,17 +41,17 @@ class LightweightRAGAgent(BaseAgent):
     def __init__(self):
         info = CHAT_MODEL_INFO[CHAT_MODEL_LIGHTWEIGHT_RAG]
         super().__init__(name=info["name"], description=info["description"])
-        
+
         self.client = None
         self.vectorstore = None
         self.embeddings = None
         self.api_key = self._get_api_key()
         self.model_name = GEMINI_MODEL
         self.capabilities = info["capabilities"]
-        
+
         # Connection status tracking
         self.using_qdrant = False
-        
+
         # Hybrid search components
         self.bm25_retriever = None
         self.hybrid_retriever = None
@@ -72,44 +70,34 @@ class LightweightRAGAgent(BaseAgent):
         """Initialize lightweight RAG agent using the new SDK."""
         try:
             from google import genai
-            
+
             api_key = kwargs.get("api_key", self.api_key)
             if not api_key:
                 raise ValueError("Gemini API key is required.")
-                
-            # Initialize new GenAI client
+
             self.client = genai.Client(api_key=api_key)
-            
-            # Initialize embeddings wrapper (now uses new SDK internally)
             self.embeddings = GeminiEmbeddings(api_key=api_key)
-            
-            # Initialize vector store
             self._initialize_vector_store()
-            
+
             self.is_initialized = True
             return True
         except Exception as e:
-            print(f"[ERROR] Failed to initialize lightweight RAG agent: {e}")
+            print("[ERROR] Failed to initialize lightweight RAG agent: " + str(e))
             self.is_initialized = False
             return False
 
     def _initialize_vector_store(self):
         """Initialize Qdrant vector store with API-based embeddings."""
         from qdrant_client import QdrantClient
-
         if not QDRANT_URL or not QDRANT_API_KEY:
             print("[WARNING] Qdrant credentials not found. Using sample knowledge base.")
             self._create_sample_knowledge_base()
             return
-
         try:
-            # Connect to Qdrant Cloud
             self.qdrant_client = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
-            
-            # Check if collection exists
             collections = self.qdrant_client.get_collections().collections
             collection_exists = any(c.name == QDRANT_COLLECTION_NAME_LIGHTWEIGHT for c in collections)
-            
+
             if collection_exists:
                 self.vectorstore = QdrantVectorStore(
                     client=self.qdrant_client,
@@ -117,9 +105,8 @@ class LightweightRAGAgent(BaseAgent):
                     embeddings=self.embeddings
                 )
                 self.using_qdrant = True
-                print(f"[OK] Connected to existing collection: {QDRANT_COLLECTION_NAME_LIGHTWEIGHT}")
+                print("[OK] Connected to existing collection: " + QDRANT_COLLECTION_NAME_LIGHTWEIGHT)
             else:
-                # Create from documents or fallback
                 docs_path = Path(CLINICAL_DOCS_PATH)
                 if docs_path.exists() and any(docs_path.iterdir()):
                     self.index_documents()
@@ -127,73 +114,63 @@ class LightweightRAGAgent(BaseAgent):
                 else:
                     self._create_sample_knowledge_base()
         except Exception as e:
-            print(f"[ERROR] Failed to connect to Qdrant: {e}")
+            print("[ERROR] Failed to connect to Qdrant: " + str(e))
             self._create_sample_knowledge_base()
 
     def index_documents(self, batch_size: int = 50) -> str:
         """Index clinical documents into Qdrant."""
         from qdrant_client import QdrantClient
         from qdrant_client.models import VectorParams, Distance
-        
+
         try:
             documents = []
-            # Load TXT
             for txt_file in Path(CLINICAL_DOCS_PATH).glob("**/*.txt"):
                 text = load_text_file(str(txt_file))
                 if text:
                     documents.append(Document(
-                        page_content=text, 
+                        page_content=text,
                         metadata={"source": txt_file.name, "file_type": "txt"}
                     ))
-            
-            # Load PDF
+
             for pdf_file in Path(CLINICAL_DOCS_PATH).glob("**/*.pdf"):
                 text = load_pdf(str(pdf_file))
                 if text:
                     documents.append(Document(
-                        page_content=text, 
+                        page_content=text,
                         metadata={"source": pdf_file.name, "file_type": "pdf"}
                     ))
 
             if not documents:
-                return f"No documents found in {CLINICAL_DOCS_PATH}"
+                return "No documents found in " + CLINICAL_DOCS_PATH
 
-            # Chunk
             chunked_docs = []
             for doc in documents:
                 chunks = chunk_text(doc.page_content, RAG_CHUNK_SIZE, RAG_CHUNK_OVERLAP)
                 for chunk in chunks:
                     chunked_docs.append(Document(page_content=chunk, metadata=doc.metadata))
 
-            # Collection Setup
             self.qdrant_client = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
-            
-            # Dimension check (Gemini-embedding-001 is 768 when requested via our wrapper)
             test_emb = self.embeddings.embed_query("test")
             dimension = len(test_emb)
-
             collections = self.qdrant_client.get_collections().collections
             if any(c.name == QDRANT_COLLECTION_NAME_LIGHTWEIGHT for c in collections):
                 self.qdrant_client.delete_collection(collection_name=QDRANT_COLLECTION_NAME_LIGHTWEIGHT)
-            
+
             self.qdrant_client.create_collection(
                 collection_name=QDRANT_COLLECTION_NAME_LIGHTWEIGHT,
                 vectors_config=VectorParams(size=dimension, distance=Distance.COSINE)
             )
-
             self.vectorstore = QdrantVectorStore(
                 client=self.qdrant_client,
                 collection_name=QDRANT_COLLECTION_NAME_LIGHTWEIGHT,
                 embeddings=self.embeddings
             )
 
-            # Upload
             for i in range(0, len(chunked_docs), batch_size):
                 batch = chunked_docs[i:i + batch_size]
                 self.vectorstore.add_documents(batch)
                 time.sleep(0.5)
 
-            # Hybrid
             if RAG_USE_HYBRID_SEARCH:
                 self.bm25_retriever = BM25Retriever(chunked_docs)
                 self.hybrid_retriever = HybridRetriever(
@@ -201,35 +178,34 @@ class LightweightRAGAgent(BaseAgent):
                     bm25_retriever=self.bm25_retriever,
                     alpha=RAG_HYBRID_ALPHA
                 )
-
             self.using_qdrant = True
-            return f"Successfully indexed {len(chunked_docs)} chunks."
+            return "Successfully indexed " + str(len(chunked_docs)) + " chunks."
         except Exception as e:
-            print(f"[ERROR] Indexing failed: {e}")
-            return f"Error: {str(e)}"
+            print("[ERROR] Indexing failed: " + str(e))
+            return "Error: " + str(e)
 
     def _create_sample_knowledge_base(self):
         """Create sample fallback knowledge base."""
         from qdrant_client import QdrantClient
         from qdrant_client.models import VectorParams, Distance
         import tempfile
-        
+
         sample_docs = [
             Document(
                 page_content="Diabetes Prevention: Lifestyle interventions can reduce risk by 58%. Strategies: 5-7% weight loss, 150 min activity/week.",
                 metadata={"source": "Sample Guidelines"}
             )
         ]
-        
+
         temp_dir = tempfile.mkdtemp()
         self.qdrant_client = QdrantClient(path=temp_dir)
         dimension = len(self.embeddings.embed_query("test"))
-        
+
         self.qdrant_client.create_collection(
             collection_name=QDRANT_COLLECTION_NAME_LIGHTWEIGHT,
             vectors_config=VectorParams(size=dimension, distance=Distance.COSINE)
         )
-        
+
         self.vectorstore = QdrantVectorStore(
             client=self.qdrant_client,
             collection_name=QDRANT_COLLECTION_NAME_LIGHTWEIGHT,
@@ -243,24 +219,19 @@ class LightweightRAGAgent(BaseAgent):
         """Generate RAG response using the new SDK."""
         if not self.is_initialized or not self.vectorstore:
             return self._generate_fallback_response(message, context)
-
         try:
-            # Retrieve
             if RAG_USE_HYBRID_SEARCH and self.hybrid_retriever:
                 docs_with_scores = self.hybrid_retriever.retrieve(message, k=RAG_TOP_K)
             else:
                 docs_with_scores = self.vectorstore.similarity_search_with_score(message, k=RAG_TOP_K)
 
-            # Filter
             filtered_docs = [(doc, score) for doc, score in docs_with_scores if score >= RAG_MIN_RELEVANCE_SCORE]
             if not filtered_docs:
                 return self._generate_fallback_response(message, context)
 
-            # Build Prompt
             retrieved_context = self._format_retrieved_docs([doc for doc, _ in filtered_docs])
             prompt = self._build_rag_prompt(message, context, retrieved_context, conversation_history)
 
-            # Generate (New SDK)
             if self.client:
                 response = self.client.models.generate_content(
                     model=self.model_name,
@@ -269,44 +240,45 @@ class LightweightRAGAgent(BaseAgent):
                 return response.text
             return self._generate_fallback_response(message, context)
         except Exception as e:
-            print(f"[ERROR] RAG generation failed: {e}")
+            print("[ERROR] RAG generation failed: " + str(e))
             return self._generate_fallback_response(message, context)
 
     def _format_retrieved_docs(self, docs: List[Document]) -> str:
         formatted = []
         for i, doc in enumerate(docs, 1):
             source = doc.metadata.get("source", "Unknown")
-            formatted.append(f"[Source {i}] {source}
-{doc.page_content}
-")
-        return "
-".join(formatted)
+            entry = "[Source " + str(i) + "] " + source + "\n" + doc.page_content + "\n"
+            formatted.append(entry)
+        return "\n".join(formatted)
 
     def _build_rag_prompt(self, message: str, context: Dict, retrieved_context: str, conversation_history: Optional[List[Dict[str, str]]] = None) -> str:
         prob = context.get("probability", 0)
         risk = context.get("risk_level", "Unknown")
         summary = context.get("profile_summary", "No data")
-        
-        return f"""You are a clinical diabetes specialist.
-PATIENT PROFILE: Risk Level {risk} ({prob:.1f}%), Metrics: {summary}
-CLINICAL EVIDENCE: {retrieved_context}
-QUESTION: {message}
+        prob_str = "{:.1f}".format(prob)
 
-INSTRUCTIONS:
-1. Use ONLY the clinical evidence provided.
-2. Include citations [1], [2].
-3. End with a **References:** section.
-4. Include a medical disclaimer.
-"""
+        return (
+            "You are a clinical diabetes specialist.\n"
+            "PATIENT PROFILE: Risk Level " + risk + " (" + prob_str + "%), Metrics: " + summary + "\n"
+            "CLINICAL EVIDENCE: " + retrieved_context + "\n"
+            "QUESTION: " + message + "\n"
+            "INSTRUCTIONS:\n"
+            "1. Use ONLY the clinical evidence provided.\n"
+            "2. Include citations [1], [2].\n"
+            "3. End with a **References:** section.\n"
+            "4. Include a medical disclaimer."
+        )
 
     def _generate_fallback_response(self, message: str, context: Dict) -> str:
         prob = context.get("probability", 0)
         risk = context.get("risk_level", "Unknown")
         db_status = "Connected" if self.using_qdrant else "Fallback (Sample KB)"
-        
-        return f"""**Clinical Assessment:** Risk {prob:.1f}% ({risk}).
-Database Status: {db_status}.
-Please consult a professional. Clinical evidence retrieval currently limited."""
+        prob_str = "{:.1f}".format(prob)
+        return (
+            "**Clinical Assessment:** Risk " + prob_str + "% (" + risk + ").\n"
+            "Database Status: " + db_status + ".\n"
+            "Please consult a professional. Clinical evidence retrieval currently limited."
+        )
 
     def is_ready(self) -> bool:
         return self.is_initialized and self.vectorstore is not None
