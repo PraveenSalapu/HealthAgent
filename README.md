@@ -6,8 +6,6 @@ A diabetes risk assessment tool combining machine learning risk prediction with 
 [![Streamlit](https://img.shields.io/badge/streamlit-1.28+-red.svg)](https://streamlit.io)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
----
-
 ## Table of Contents
 
 - [Overview](#overview)
@@ -108,14 +106,14 @@ Then edit `.streamlit/secrets.toml` and add your credentials:
 
 ```toml
 GEMINI_API_KEY = "your_gemini_api_key_here"
-GEMINI_MODEL = "gemini-1.5-flash"
+GEMINI_MODEL = "gemini-2.5-flash"
 ```
 
 **Full (with RAG Agent):**
 
 ```toml
 GEMINI_API_KEY = "your_gemini_api_key_here"
-GEMINI_MODEL = "gemini-1.5-flash"
+GEMINI_MODEL = "gemini-2.5-flash"
 QDRANT_URL = "https://your-cluster.aws.cloud.qdrant.io"
 QDRANT_API_KEY = "your_qdrant_api_key_here"
 ```
@@ -171,7 +169,7 @@ mkdir -p data/clinical_docs
 - Motivational support and habit coaching
 - Stress management guidance
 
-**Technology:** Google Gemini 1.5 Flash API
+**Technology:** Google Gemini 2.5 Flash API
 
 ---
 
@@ -190,7 +188,7 @@ mkdir -p data/clinical_docs
 - **Embeddings:** Sentence Transformers (all-MiniLM-L6-v2)
 - **Search:** Hybrid (semantic + BM25)
 - **Re-ranking:** Cross-encoder
-- **Generation:** Gemini 1.5 Flash
+- **Generation:** Gemini 2.5 Flash
 
 ---
 
