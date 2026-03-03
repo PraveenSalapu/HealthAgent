@@ -1,7 +1,6 @@
-# ============================================================================
 # Health AI Chatbot - Streamlit Cloud Requirements
 # Optimized for cloud deployment (lightweight, no heavy ML frameworks)
-# ============================================================================
+# -------------------------------------------------------------------------
 
 # Data Processing
 streamlit
@@ -14,9 +13,9 @@ imbalanced-learn
 requests
 
 # Gemini API for LLM and embeddings
-google-generativeai==0.3.2
+google-genai
 
 # Lightweight RAG components
 qdrant-client==1.7.0
 rank-bm25
-PyPDF2==3.0.1
+PyPDF2--3.0.1
