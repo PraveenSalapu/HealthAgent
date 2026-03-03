@@ -1,6 +1,6 @@
 # Health AI Chatbot - Multi-Agent Diabetes Risk Prediction
 
-> **An intelligent health assistant combining machine learning risk prediction with evidence-based medical insights through advanced RAG (Retrieval-Augmented Generation) technology.**
+A diabetes risk assessment tool combining machine learning risk prediction with evidence-based medical insights through RAG (Retrieval-Augmented Generation).
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Streamlit](https://img.shields.io/badge/streamlit-1.28+-red.svg)](https://streamlit.io)
@@ -8,7 +8,7 @@
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [Features](#features)
@@ -23,43 +23,46 @@
 
 ---
 
-## 🎯 Overview
+## Overview
 
-The Health AI Chatbot is a comprehensive diabetes risk assessment tool that combines:
+The Health AI Chatbot is a diabetes risk assessment tool that combines:
 
 1. **ML-Powered Risk Prediction**: XGBoost model trained on BRFSS data
 2. **Gemini Agent**: Conversational health coaching and lifestyle guidance
 3. **RAG Agent**: Evidence-based clinical insights from medical literature with citations
 
-**Key Differentiator:** Phase 2 RAG implementation with **hybrid search** (semantic + keyword), **cross-encoder re-ranking**, **query expansion**, and **automated citation validation** for trustworthy medical information.
+Phase 2 RAG uses hybrid search (semantic + keyword), cross-encoder re-ranking, query expansion, and citation validation.
 
 ---
 
-## ✨ Features
+## Features
 
-### 🤖 Multi-Agent Chatbot System
+### Multi-Agent Chatbot System
+
 - **Gemini Agent**: Personalized health advice, motivation, and lifestyle coaching
 - **RAG Agent**: Clinical insights with citations from ADA 2024 guidelines and medical literature
 - **Seamless Switching**: Toggle between agents while maintaining context
 - **Context-Aware**: Prediction results automatically shared with all agents
 
-### 📊 Diabetes Risk Assessment
+### Diabetes Risk Assessment
+
 - XGBoost-based prediction model (trained on BRFSS 2015 dataset)
 - Interactive visualizations (radar charts, bar charts, risk gauge)
 - Personalized health insights based on 11 risk factors
 - Comparison with diabetic population averages
 
-### 🔬 Phase 2 RAG Features (Advanced)
+### Phase 2 RAG Features
+
 - **Hybrid Search**: Combines semantic (70%) + BM25 keyword search (30%)
-- **Cross-Encoder Re-Ranking**: 40-60% better relevance than standard retrieval
+- **Cross-Encoder Re-Ranking**: Improved relevance over standard retrieval
 - **Query Expansion**: Automatically expands medical terms (e.g., A1C → HbA1c)
-- **Citation Validation**: Ensures 100% citation coverage with quality checks
+- **Citation Validation**: Citation coverage with quality checks
 - **Quality Filtering**: Evidence-level filtering (Level A/B/C sources)
 - **6,328+ Medical Chunks**: Indexed from ADA 2024 diabetes guidelines
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # 1. Clone repository
@@ -81,19 +84,20 @@ cp .streamlit/secrets.toml.example .streamlit/secrets.toml
 streamlit run app_modular.py
 ```
 
-**📖 For detailed setup instructions, see [SETUP.md](SETUP.md)**
+**For detailed setup instructions, see [SETUP.md](SETUP.md)**
 
 ---
 
-## ⚠️ Missing Files & How to Handle Them
+## Missing Files & How to Handle Them
 
 When you clone this repository, **some files will be missing by design**. Here's what to expect and how to fix it:
 
-### 1. `.streamlit/secrets.toml` ❌ MISSING
+### 1. `.streamlit/secrets.toml` - MISSING
 
 **Why:** Contains sensitive API keys (excluded for security)
 
 **How to fix:**
+
 ```bash
 cp .streamlit/secrets.toml.example .streamlit/secrets.toml
 ```
@@ -101,12 +105,14 @@ cp .streamlit/secrets.toml.example .streamlit/secrets.toml
 Then edit `.streamlit/secrets.toml` and add your credentials:
 
 **Minimum (Gemini Agent only):**
+
 ```toml
 GEMINI_API_KEY = "your_gemini_api_key_here"
 GEMINI_MODEL = "gemini-1.5-flash"
 ```
 
 **Full (with RAG Agent):**
+
 ```toml
 GEMINI_API_KEY = "your_gemini_api_key_here"
 GEMINI_MODEL = "gemini-1.5-flash"
@@ -118,32 +124,32 @@ QDRANT_API_KEY = "your_qdrant_api_key_here"
 - Gemini: https://makersuite.google.com/app/apikey
 - Qdrant: https://cloud.qdrant.io/ (free tier available)
 
-### 2. `data/clinical_docs/` ❌ MISSING
+### 2. `data/clinical_docs/` - MISSING
 
 **Why:** Large PDF files (100+ MB) excluded from git
 
 **Impact:**
-- ✅ RAG Agent will still work with built-in sample knowledge base
-- ⚠️ For full medical literature access, add your own documents
+- RAG Agent will still work with built-in sample knowledge base
+- For full medical literature access, add your own documents
 
 **How to fix (optional):**
+
 ```bash
 mkdir -p data/clinical_docs
 # Add PDF or TXT files with medical content
-# Example: ADA diabetes guidelines, research papers, etc.
 ```
 
 **Note:** The RAG agent automatically indexes documents on first run.
 
-### 3. `data/chroma_db/` ❌ DEPRECATED
+### 3. `data/chroma_db/` - DEPRECATED
 
 **Why:** Old vector database (Phase 1) replaced by Qdrant Cloud (Phase 2)
 
 **Impact:** Not needed - Phase 2 uses cloud-based Qdrant for vector storage
 
-**How to fix:** No action needed (ignore this folder)
+**How to fix:** No action needed
 
-### 4. Test/Script Files ❌ EXCLUDED
+### 4. Test/Script Files - EXCLUDED
 
 **Files excluded:** `test_*.py`, `verify_rag.py`, `reindex_documents.py`
 
@@ -151,13 +157,12 @@ mkdir -p data/clinical_docs
 
 **Impact:** None - application works without them
 
-**How to fix:** No action needed
-
 ---
 
-## 🤖 Multi-Agent System
+## Multi-Agent System
 
-### Gemini Agent 💬
+### Gemini Agent
+
 **Purpose:** Conversational health coaching
 
 **Capabilities:**
@@ -168,11 +173,10 @@ mkdir -p data/clinical_docs
 
 **Technology:** Google Gemini 1.5 Flash API
 
-**Use when:** You want encouragement, lifestyle tips, or general wellness advice
-
 ---
 
-### RAG Agent 📚
+### RAG Agent
+
 **Purpose:** Evidence-based clinical insights
 
 **Capabilities:**
@@ -182,121 +186,91 @@ mkdir -p data/clinical_docs
 - Grounded responses (no speculation)
 
 **Technology Stack:**
-- **Vector DB:** Qdrant Cloud (production-grade)
+- **Vector DB:** Qdrant Cloud
 - **Embeddings:** Sentence Transformers (all-MiniLM-L6-v2)
 - **Search:** Hybrid (semantic + BM25)
-- **Re-ranking:** Cross-encoder for precision
+- **Re-ranking:** Cross-encoder
 - **Generation:** Gemini 1.5 Flash
-
-**Use when:** You need clinical information with citations and evidence
-
-**Example Response:**
-```
-**Answer:**
-The ADA recommends lifestyle interventions including 5-7% weight loss
-and 150 minutes of moderate physical activity weekly [Source: American
-Diabetes Association, 2024].
-
-**Supporting Evidence:**
-The Diabetes Prevention Program demonstrated a 58% risk reduction with
-lifestyle modifications [Source: American Diabetes Association, 2024]...
-
-**Recommendations for High Risk:**
-1. Target 5-7% weight loss through caloric reduction...
-2. Engage in 150 minutes of moderate aerobic activity...
-
-**Medical Disclaimer:**
-This is educational information only. Consult healthcare providers...
-```
 
 ---
 
-## 🔬 Phase 2 RAG Features
+## Phase 2 RAG Features
 
-### What Makes This RAG System Advanced?
+### Architecture Comparison
 
-| Feature | Phase 1 (Basic) | Phase 2 (Current) |
-|---------|-----------------|-------------------|
+| Feature | Phase 1 | Phase 2 |
+|---------|---------|--------|
 | **Search Type** | Semantic only | Hybrid (semantic + BM25) |
 | **Relevance Scoring** | Basic similarity | Cross-encoder re-ranking |
 | **Query Understanding** | Literal | Medical synonym expansion |
 | **Quality Control** | None | Citation validation + filtering |
-| **Vector Database** | Local ChromaDB | Qdrant Cloud (scalable) |
+| **Vector Database** | Local ChromaDB | Qdrant Cloud |
 | **Documents Indexed** | Sample only | 6,328 chunks (ADA 2024) |
-| **Citation Rate** | ~60% | 100% (validated) |
 
 ### Technical Architecture
 
 ```
 User Query
-    ↓
+  ↓
 Query Expansion (A1C → HbA1c, hemoglobin A1c)
-    ↓
+  ↓
 Hybrid Retrieval (70% semantic + 30% BM25)
-    ↓
+  ↓
 Cross-Encoder Re-Ranking (top 3 of 10)
-    ↓
+  ↓
 Quality Filtering (Evidence Level A/B/C, score >0.65)
-    ↓
-Gemini Generation (grounded prompt)
-    ↓
-Citation Validation (automated quality check)
-    ↓
+  ↓
+Generation (grounded prompt)
+  ↓
+Citation Validation
+  ↓
 Response with Citations
 ```
 
-### Performance Metrics
-
-- **Response Time:** ~9.7 seconds average
-- **Citation Coverage:** 100% (11-12 citations per response)
-- **Relevance Improvement:** +40-60% vs basic semantic search
-- **Validation Pass Rate:** 100%
-- **Medical Disclaimer:** Included in every response
-
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 HealthAgentDiabetic/
-├── app_modular.py              # Main application entry point ⭐
+├── app_modular.py              # Main application entry point
 ├── requirements.txt            # Python dependencies
-├── README.md                   # This file (project overview)
+├── README.md
 ├── SETUP.md                    # Detailed setup instructions
-├── .gitignore                  # Excluded files
+├── .gitignore
 │
 ├── .streamlit/
-│   ├── secrets.toml.example   # Template for API keys
-│   └── secrets.toml           # Your secrets (NOT in git) ❌
+│   ├── secrets.toml.example    # Template for API keys
+│   └── secrets.toml            # Your secrets (NOT in git)
 │
-├── agents/                     # Multi-agent system
-│   ├── base_agent.py          # Abstract base class
-│   ├── gemini_agent.py        # Gemini API agent
-│   ├── rag_agent.py           # RAG agent (Phase 2) ⭐
-│   ├── retrieval_components.py # Phase 2: Hybrid search, re-ranking
-│   └── agent_manager.py       # Agent orchestration
+├── agents/
+│   ├── base_agent.py
+│   ├── gemini_agent.py
+│   ├── rag_agent.py
+│   ├── retrieval_components.py # Hybrid search, re-ranking
+│   └── agent_manager.py
 │
 ├── config/
-│   ├── settings.py            # All configuration constants
-│   └── document_metadata.py   # Metadata for clinical documents
+│   ├── settings.py
+│   └── document_metadata.py
 │
 ├── models/
-│   ├── model_loader.py        # ML model loading
-│   └── predictor.py           # Diabetes risk prediction
+│   ├── model_loader.py
+│   └── predictor.py
 │
 ├── ui/
-│   ├── chat_interface.py      # Chat UI components
-│   ├── forms.py               # Health assessment form
-│   ├── visualizations.py      # Charts and graphs
-│   └── styles.py              # CSS styling
+│   ├── chat_interface.py
+│   ├── forms.py
+│   ├── visualizations.py
+│   └── styles.py
 │
 ├── utils/
-│   └── helpers.py             # Utility functions
+│   └── helpers.py
 │
 ├── data/
-│   └── clinical_docs/         # Medical PDFs (NOT in git) ❌
+│   └── clinical_docs/          # Medical PDFs (NOT in git)
 │
-└── model_output2/             # Trained XGBoost model
+└── model_output2/
     ├── xgboost_model.json
     ├── preprocessor.pkl
     ├── optimal_threshold.json
@@ -305,26 +279,28 @@ HealthAgentDiabetic/
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 | Document | Purpose |
 |----------|---------|
 | **[SETUP.md](SETUP.md)** | Complete setup guide with troubleshooting |
 | **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** | Deploy to Streamlit Cloud |
-| **[IMPROVED_RAG_DESIGN.md](IMPROVED_RAG_DESIGN.md)** | RAG architecture details (technical) |
+| **[IMPROVED_RAG_DESIGN.md](IMPROVED_RAG_DESIGN.md)** | RAG architecture details |
 | **[PHASE1_RESULTS.md](PHASE1_RESULTS.md)** | Phase 1 implementation results |
 | **[PHASE2_RESULTS.md](PHASE2_RESULTS.md)** | Phase 2 testing and benchmarks |
 
 ---
 
-## 🎮 Usage
+## Usage
 
 ### 1. Start the Application
+
 ```bash
 streamlit run app_modular.py
 ```
 
 ### 2. Complete Health Assessment
+
 Fill out the form with 11 health metrics:
 - General Health, BMI, Age
 - High BP, High Cholesterol, Heart Disease
@@ -332,35 +308,36 @@ Fill out the form with 11 health metrics:
 - Physical Health Days, Income, Education
 
 ### 3. Get Risk Prediction
+
 - XGBoost model predicts diabetes risk
 - Visualizations show risk factors
 - Comparison with diabetic population
 
 ### 4. Chat with Agents
-- **Ask Gemini:** "How can I improve my lifestyle?"
-- **Ask RAG:** "What does ADA recommend for prediabetes?"
+
+- **Gemini:** For lifestyle tips, general wellness advice
+- **RAG:** For clinical information with citations (e.g., ADA recommendations)
 - Switch between agents seamlessly
 
 ---
 
-## 🔧 Configuration
+## Configuration
 
 Edit `config/settings.py` to customize:
 
 ### RAG Settings:
-```python
-# Search configuration
-RAG_USE_HYBRID_SEARCH = True   # Enable semantic + BM25
-RAG_USE_RERANKING = True       # Enable cross-encoder
-RAG_HYBRID_ALPHA = 0.7         # 70% semantic, 30% keyword
 
-# Quality thresholds
-RAG_MIN_RELEVANCE_SCORE = 0.65 # Minimum similarity
-RAG_TOP_K = 3                  # Final documents used
-RAG_INITIAL_K = 10             # Initial retrieval count
+```python
+RAG_USE_HYBRID_SEARCH = True    # Enable semantic + BM25
+RAG_USE_RERANKING = True        # Enable cross-encoder
+RAG_HYBRID_ALPHA = 0.7          # 70% semantic, 30% keyword
+RAG_MIN_RELEVANCE_SCORE = 0.65  # Minimum similarity
+RAG_TOP_K = 3                   # Final documents used
+RAG_INITIAL_K = 10              # Initial retrieval count
 ```
 
 ### Model Selection:
+
 ```python
 # For better medical accuracy (requires re-indexing):
 RAG_EMBEDDING_MODEL = "pritamdeka/BioBERT-mnli-snli-scinli-scitail-mednli-stsb"
@@ -368,97 +345,58 @@ RAG_EMBEDDING_MODEL = "pritamdeka/BioBERT-mnli-snli-scinli-scitail-mednli-stsb"
 
 ---
 
-## 🧪 Testing
+## Testing
 
-### Quick Test (Verify Installation):
 ```bash
-python -c "from models import load_model_components; print('✓ Models OK')"
-python -c "from agents import GeminiAgent, RAGAgent; print('✓ Agents OK')"
-python -c "from ui import render_chat_interface; print('✓ UI OK')"
-```
-
-### Test Gemini Agent:
-```python
-from agents import GeminiAgent
-
-agent = GeminiAgent()
-agent.initialize(api_key="your_key")
-response = agent.generate_response("Tell me about diabetes prevention", {})
-print(response)
-```
-
-### Test RAG Agent:
-```python
-from agents import RAGAgent
-
-agent = RAGAgent()
-agent.initialize()  # Uses secrets.toml
-response = agent.generate_response("What are ADA screening guidelines?", {})
-print(response)  # Should include [Source: ...] citations
+python -c "from models import load_model_components; print('Models OK')"
+python -c "from agents import GeminiAgent, RAGAgent; print('Agents OK')"
+python -c "from ui import render_chat_interface; print('UI OK')"
 ```
 
 ---
 
-## 🚢 Deployment
+## Deployment
 
-### Streamlit Cloud (Recommended):
+### Streamlit Cloud:
 
 1. Push code to GitHub
 2. Go to [share.streamlit.io](https://share.streamlit.io/)
 3. Connect GitHub and select repository
 4. Set main file: `app_modular.py`
 5. Add secrets in deployment settings:
-   ```toml
-   GEMINI_API_KEY = "your_key"
-   QDRANT_URL = "your_url"
-   QDRANT_API_KEY = "your_key"
-   ```
+```toml
+GEMINI_API_KEY = "your_key"
+QDRANT_URL = "your_url"
+QDRANT_API_KEY = "your_key"
+```
 6. Deploy
 
-**See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for detailed instructions**
+See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for details.
 
 ---
 
-## 🤝 Contributing
-
-Contributions welcome! Here's how:
+## Contributing
 
 1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to branch (`git push origin feature/amazing-feature`)
+2. **Create** a feature branch (`git checkout -b feature/your-feature`)
+3. **Commit** your changes
+4. **Push** to the branch
 5. **Open** a Pull Request
-
-### Development Setup:
-```bash
-# Clone your fork
-git clone https://github.com/YOUR_USERNAME/HealthAgentDiabetic.git
-cd HealthAgentDiabetic
-
-# Create branch
-git checkout -b feature/my-feature
-
-# Make changes, test, commit
-git add .
-git commit -m "feat: Add my feature"
-git push origin feature/my-feature
-```
 
 ---
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 **This application is for educational and informational purposes only.**
 
-- ❌ Not a substitute for professional medical advice
-- ❌ Not for diagnosis or treatment
-- ❌ Not FDA approved or medically certified
-- ✅ Always consult healthcare providers for medical decisions
-- ✅ Use as a supplementary educational tool only
+- Not a substitute for professional medical advice
+- Not for diagnosis or treatment
+- Not FDA approved or medically certified
+- Always consult healthcare providers for medical decisions
 
 ---
 
-## 📧 Contact & Support
+## Contact & Support
 
 - **GitHub Issues:** [Report bugs or request features](https://github.com/PraveenSalapu/HealthAgentDiabetic/issues)
 - **Developer:** Praveen Salapu
@@ -466,21 +404,14 @@ git push origin feature/my-feature
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see LICENSE file for details.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **ADA 2024 Guidelines:** American Diabetes Association Standards of Care
 - **BRFSS Dataset:** CDC Behavioral Risk Factor Surveillance System
 - **Technology:** Streamlit, LangChain, Qdrant, Google Gemini, XGBoost
-- **Medical Knowledge:** All clinical information sourced from peer-reviewed guidelines
-
----
-
-**Made with ❤️ for better diabetes prevention and health awareness**
-
-**Phase 2 Status:** ✅ Production Ready | Last Updated: November 2024
