@@ -1,6 +1,12 @@
 """
 Lightweight RAG components using API-based embeddings (no heavy ML dependencies).
-Uses Gemini API for embeddings instead of local models - perfect for Streamlit Cloud.
+Uses Google GenAI SDK (new unified SDK) for embeddings - perfect for Streamlit Cloud.
+
+Migration notes:
+- Replaced deprecated google.generativeai (old SDK) with google.genai (new SDK)
+- Replaced deprecated text-embedding-004 with gemini-embedding-001
+- output_dimensionality=768 keeps compatibility with existing Qdrant collections
+  indexed at 768 dims. Change to 3072 and re-index for full quality upgrade.
 """
 
 import re
@@ -17,38 +23,51 @@ class Document:
 
 
 class GeminiEmbeddings:
-    """API-based embeddings using Gemini (no local model required)."""
-    def __init__(self, api_key: str):
-        import google.generativeai as genai
-        genai.configure(api_key=api_key)
-        self.model_name = "models/text-embedding-004"
+    """
+    API-based embeddings using the new Google GenAI SDK.
+    Uses gemini-embedding-001 (replaces deprecated text-embedding-004).
+    output_dimensionality=768 preserves compatibility with existing Qdrant collections.
+    """
+
+    def __init__(self, api_key: str, output_dimensionality: int = 768):
+        from google import genai
+        self.client = genai.Client(api_key=api_key)
+        self.model_name = "gemini-embedding-001"
+        self.output_dimensionality = output_dimensionality
 
     def embed_query(self, text: str) -> List[float]:
         """Embed a single query text."""
-        import google.generativeai as genai
-        result = genai.embed_content(
+        from google.genai import types
+        result = self.client.models.embed_content(
             model=self.model_name,
-            content=text,
-            task_type="retrieval_query"
+            contents=text,
+            config=types.EmbedContentConfig(
+                task_type="RETRIEVAL_QUERY",
+                output_dimensionality=self.output_dimensionality,
+            ),
         )
-        return result['embedding']
+        return result.embeddings[0].values
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
         """Embed multiple documents."""
-        import google.generativeai as genai
-        results = []
+        from google.genai import types
+        embeddings = []
         for text in texts:
-            result = genai.embed_content(
+            result = self.client.models.embed_content(
                 model=self.model_name,
-                content=text,
-                task_type="retrieval_document"
+                contents=text,
+                config=types.EmbedContentConfig(
+                    task_type="RETRIEVAL_DOCUMENT",
+                    output_dimensionality=self.output_dimensionality,
+                ),
             )
-            results.append(result['embedding'])
-        return results
+            embeddings.append(result.embeddings[0].values)
+        return embeddings
 
 
 class QdrantVectorStore:
     """Lightweight vector store wrapper for Qdrant."""
+
     def __init__(self, client, collection_name: str, embeddings: GeminiEmbeddings):
         self.client = client
         self.collection_name = collection_name
@@ -57,8 +76,6 @@ class QdrantVectorStore:
     def similarity_search_with_score(self, query: str, k: int = 5) -> List[Tuple[Document, float]]:
         """Search for similar documents and return with scores."""
         query_vector = self.embeddings.embed_query(query)
-
-        # Use query_points for newer Qdrant client versions
         try:
             results = self.client.query_points(
                 collection_name=self.collection_name,
@@ -67,7 +84,6 @@ class QdrantVectorStore:
             )
             points = results.points
         except (AttributeError, TypeError):
-            # Fallback: use search method for older Qdrant versions
             try:
                 points = self.client.search(
                     collection_name=self.collection_name,
@@ -75,7 +91,6 @@ class QdrantVectorStore:
                     limit=k
                 )
             except AttributeError:
-                # Last fallback: scroll through collection
                 from qdrant_client.models import Filter
                 scroll_result = self.client.scroll(
                     collection_name=self.collection_name,
@@ -89,19 +104,15 @@ class QdrantVectorStore:
                 page_content=result.payload.get('content', ''),
                 metadata=result.payload.get('metadata', {})
             )
-            # Default score if not available
             score = getattr(result, 'score', 1.0)
             docs_with_scores.append((doc, score))
-
         return docs_with_scores
 
     def add_documents(self, documents: List[Document]) -> None:
         """Add documents to the vector store."""
         from qdrant_client.models import PointStruct
-
         texts = [doc.page_content for doc in documents]
         embeddings = self.embeddings.embed_documents(texts)
-
         points = []
         for doc, embedding in zip(documents, embeddings):
             point = PointStruct(
@@ -113,12 +124,12 @@ class QdrantVectorStore:
                 }
             )
             points.append(point)
-
         self.client.upsert(collection_name=self.collection_name, points=points)
 
 
 class BM25Retriever:
     """Keyword-based retrieval using BM25 algorithm."""
+
     def __init__(self, documents: List[Document]):
         self.documents = documents
         self.bm25 = None
@@ -143,7 +154,6 @@ class BM25Retriever:
         """Retrieve documents using BM25 scoring."""
         if not self.bm25:
             return []
-
         tokenized_query = self._tokenize(query)
         scores = self.bm25.get_scores(tokenized_query)
         top_k_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:k]
@@ -153,6 +163,7 @@ class BM25Retriever:
 
 class HybridRetriever:
     """Combines semantic (vector) and keyword (BM25) search."""
+
     def __init__(self, vectorstore: QdrantVectorStore, bm25_retriever: Optional[BM25Retriever] = None, alpha: float = 0.7):
         self.vectorstore = vectorstore
         self.bm25_retriever = bm25_retriever
@@ -160,13 +171,11 @@ class HybridRetriever:
 
     def retrieve(self, query: str, k: int = 5) -> List[Tuple[Document, float]]:
         """Hybrid retrieval with weighted fusion."""
-        semantic_results = self.vectorstore.similarity_search_with_score(query, k=k*2)
-
+        semantic_results = self.vectorstore.similarity_search_with_score(query, k=k * 2)
         if self.bm25_retriever:
-            keyword_results = self.bm25_retriever.retrieve(query, k=k*2)
+            keyword_results = self.bm25_retriever.retrieve(query, k=k * 2)
             combined = self._reciprocal_rank_fusion(semantic_results, keyword_results)
             return combined[:k]
-
         return semantic_results[:k]
 
     def _reciprocal_rank_fusion(self, sem_results: List[Tuple], kw_results: List[Tuple]) -> List[Tuple]:
@@ -174,17 +183,14 @@ class HybridRetriever:
         k = 60
         scores = defaultdict(float)
         doc_map = {}
-
         for rank, (doc, _) in enumerate(sem_results):
             doc_id = id(doc)
             doc_map[doc_id] = doc
             scores[doc_id] += self.alpha * (1 / (k + rank + 1))
-
         for rank, (doc, _) in enumerate(kw_results):
             doc_id = id(doc)
             doc_map[doc_id] = doc
             scores[doc_id] += (1 - self.alpha) * (1 / (k + rank + 1))
-
         ranked_doc_ids = sorted(scores.items(), key=lambda x: x[1], reverse=True)
         return [(doc_map[doc_id], score) for doc_id, score in ranked_doc_ids]
 
@@ -194,13 +200,11 @@ def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 200) -> List[st
     chunks = []
     start = 0
     text_len = len(text)
-
     while start < text_len:
         end = min(start + chunk_size, text_len)
         chunk = text[start:end]
         chunks.append(chunk)
         start += (chunk_size - overlap)
-
     return chunks
 
 
