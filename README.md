@@ -13,11 +13,9 @@ A diabetes risk assessment tool combining machine learning risk prediction with 
 - [Overview](#overview)
 - [Features](#features)
 - [Quick Start](#quick-start)
-- [Missing Files & How to Handle Them](#missing-files--how-to-handle-them)
 - [Multi-Agent System](#multi-agent-system)
 - [Phase 2 RAG Features](#phase-2-rag-features)
 - [Project Structure](#project-structure)
-- [Documentation](#documentation)
 - [Contributing](#contributing)
 - [Disclaimer](#disclaimer)
 
