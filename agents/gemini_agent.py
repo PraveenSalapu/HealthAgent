@@ -62,8 +62,7 @@ class GeminiAgent(BaseAgent):
             return response.text
         except Exception as e:
             print(f"[ERROR] Gemini response failure: {e}")
-            return self._generate_fallback_response(message, context)
-
+            return "[DEBUG] Error: " + str(e) + " | Model: " + str(self.model_name)
     def _build_system_prompt(self, context: Dict) -> str:
         prob = context.get("probability", 0)
         risk = context.get("risk_level", "Unknown")
