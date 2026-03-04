@@ -2,6 +2,8 @@
 
 A diabetes risk assessment tool combining machine learning risk prediction with evidence-based medical insights through RAG (Retrieval-Augmented Generation).
 
+🚀 **[Live Demo](https://diabetichealthagent.streamlit.app/)** | Try the app now!
+
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Streamlit](https://img.shields.io/badge/streamlit-1.28+-red.svg)](https://streamlit.io)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
