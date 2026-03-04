@@ -241,8 +241,7 @@ class LightweightRAGAgent(BaseAgent):
             return self._generate_fallback_response(message, context)
         except Exception as e:
             print("[ERROR] RAG generation failed: " + str(e))
-            return self._generate_fallback_response(message, context)
-
+            return "[DEBUG RAG] Error: " + str(e) + " | Using Qdrant: " + str(self.using_qdrant) + " | Scores threshold: " + str(RAG_MIN_RELEVANCE_SCORE)
     def _format_retrieved_docs(self, docs: List[Document]) -> str:
         formatted = []
         for i, doc in enumerate(docs, 1):
